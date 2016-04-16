@@ -1,0 +1,118 @@
+class proyecto1 {
+	// declarar variable dos veces en el mismo ambito
+	int global1;
+	//int global1;
+
+	void antesDeclarada(){
+		// Variable antes de ser declarada
+		int a;
+		a = 10; 
+		//return a;
+	}
+
+	// Declarar un arreglo tamaÃ±o 0
+	//int lista[0];
+	
+	// Prueba de los parametros de un metodo y su llamada
+	char parametrosPrueba (int param1, int param2){
+		return 'a' ;
+	}
+	int usarParametros(){
+		int a;
+		int b;
+		char c ;
+		char d;
+		// Cantidad parametros
+		//parametrosPrueba(b) ;
+
+		// Otro tipo	
+		//parametrosPrueba(b, c) ;
+		
+		// Correcto
+		parametrosPrueba(a,b) ;
+		return a;
+	}
+	// Usar expression --> methodCall debe devolver algo
+	void exprMethod (){
+		int a[10];
+		// En id [ expression ]
+		a[antesDeclarada()] = 20;
+		
+		//En while ( expression )
+		while (antesDeclarada()){
+			a[1] = 2 ;
+		}
+	}
+	// Si es void el metodo el return debe estar vacio
+	void pruebaVoid(){
+		int var;
+		//return var;
+		//return ; 
+	}
+
+	// El return debe ser del mismo tipo que el metodo
+	char pruebaTipo (){
+		char prueba ;
+		int prueba2 ;
+		//return prueba2; //cambiar esto
+		return prueba ;
+	}
+
+	// Si se usa id [ expr ], id debe ser lista y expr debe ser int
+	void pruebaVarList(){
+		char noLista;
+		char lista[20];
+		//Cambiar esto (ya no :D)
+		//lista = 'b' ; 
+		noLista[10] = 'a' ;	
+		lista[21]  = 'c';
+		//lista[true] = 'c' ;	
+	}
+
+	// Se prueba que expr en if y while sea boolean
+	boolean pruebaBoolean(){
+		int a;
+		char b ;
+		if ( a ) {
+			return false; 
+		}
+//		while ( b ) {
+//			return false; 
+//		}
+		return true;
+	}
+
+	void arithRel(){
+		int a;
+		boolean b;
+		// Arith_op
+		a = 8 + b;
+		a = 8 * true ;
+
+		// rel_op
+		//b = 8 < false;
+	}
+
+	struct llanta{
+		char tipo[3];
+		int diametro;
+	}
+	struct carro{
+		char nombre;
+		int tamano;
+		char color;
+		struct llanta susLlantas[4];
+		struct chofer {
+			int edad;
+		} xt;
+	}
+	void tieneStruct(){		
+		//return ;
+	}
+	// Verificar que el metodo main no tenga parametros
+	// Quitar el metodo main para ver si valida que el metodo exista
+	void main(int a){
+		struct carro bmw;
+		tieneStruct();
+	}
+}
