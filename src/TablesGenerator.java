@@ -82,12 +82,20 @@ public class TablesGenerator<T> extends DECAF2BaseVisitor<Object> {
     @Override
     public T visitSimpleVarDeclaration(@NotNull DECAF2Parser.SimpleVarDeclarationContext ctx) {
         //this.visit(ctx.getChild(0));
+        String type = ctx.getChild(0).getText();
         
         if (ctx.getChild(0).getText().contains("struct")) {
-        //    Structure estructura = (Structure)this.visitVarType((DECAF2Parser.VarTypeContext) ctx.getChild(0));
-            this.visit(ctx.getChild(0));
+            Object typeStruct = this.visit(ctx.getChild(0));
+            if (typeStruct instanceof Structure) {
+                Structure strc = (Structure)typeStruct;
+                type = strc.getId();
+            }
+            if (typeStruct instanceof String) {
+                type = (String)typeStruct;
+            }
+            //type = (String)this.visit(ctx.getChild(0));
         }
-        String type = ctx.getChild(0).getText();
+        
         String id = ctx.getChild(1).getText();
         
         Type tipoDato = new Type(type);
@@ -112,6 +120,18 @@ public class TablesGenerator<T> extends DECAF2BaseVisitor<Object> {
     @Override
     public T visitArrayVarDeclaration(@NotNull DECAF2Parser.ArrayVarDeclarationContext ctx) {
         String type = ctx.getChild(0).getText();
+        
+        if (ctx.getChild(0).getText().contains("struct")) {
+            Object typeStruct = this.visit(ctx.getChild(0));
+            if (typeStruct instanceof Structure) {
+                Structure strc = (Structure)typeStruct;
+                type = strc.getId();
+            }
+            if (typeStruct instanceof String) {
+                type = (String)typeStruct;
+            }
+            //type = (String)this.visit(ctx.getChild(0));
+        }
         String id = ctx.getChild(1).getText();
         
         Type tipoDato = new Type(type);
@@ -144,12 +164,20 @@ public class TablesGenerator<T> extends DECAF2BaseVisitor<Object> {
         if (ctx.getChild(0).getChildCount() > 1){
             String returnString = "";
             System.out.println("Context Var Type: " +  ctx.getText() + " cantHijos: " + ctx.getChildCount());
-            for (int i = 0; i < ctx.getChildCount(); i++) {
+            /*for (int i = 0; i < ctx.getChildCount(); i++) {
                 this.visit(ctx.getChild(i));
                 returnString = ctx.getChild(i).getText() + " ";
-            }
+            }*/
             
             return (T)this.visitChildren(ctx);
+        }
+        
+        if (ctx.getText().contains("struct")) {
+            if (this.visitChildren(ctx) == null) {
+                String ctxSTR = ctx.getText();
+                int indexOfStructSTR = ctxSTR.indexOf("struct") + 6;
+                return (T)ctx.getText().substring(indexOfStructSTR);
+            }
         }
         
         return (T)ctx.getText();

@@ -10,6 +10,6 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import DECAF2.DECAF2Parser;
 import DECAF2.DECAF2Parser.*;
 
-public class VisitorTypeChecker extends DECAF2BaseVisitor<Object>{
+public class VisitorIntermediateCode extends DECAF2BaseVisitor<Object>{
     
 }
