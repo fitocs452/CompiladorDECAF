@@ -503,8 +503,14 @@ public class GUI extends javax.swing.JFrame {
         generadorTabla = new TablesGenerator(tree);
         refreshTables();
         refreshLogText();
+        
+        generarCodigoIntermedio(generadorTabla, tree);
     }
 
+    private void generarCodigoIntermedio(TablesGenerator tablas, DECAF2Parser.ProgramaContext tree) {
+        IntermediateCodeGenerator codigoIntermedio = new IntermediateCodeGenerator(tablas, tree);
+    }
+    
     public void openFile() {
             String aux = "";   
         ArrayList<String> lineas = new ArrayList();

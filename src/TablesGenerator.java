@@ -160,10 +160,8 @@ public class TablesGenerator<T> extends DECAF2BaseVisitor<Object> {
     
     @Override
     public T visitVarType(@NotNull DECAF2Parser.VarTypeContext ctx) {
-        System.out.println(ctx.getText());
         if (ctx.getChild(0).getChildCount() > 1){
             String returnString = "";
-            System.out.println("Context Var Type: " +  ctx.getText() + " cantHijos: " + ctx.getChildCount());
             /*for (int i = 0; i < ctx.getChildCount(); i++) {
                 this.visit(ctx.getChild(i));
                 returnString = ctx.getChild(i).getText() + " ";
