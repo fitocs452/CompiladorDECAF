@@ -62,4 +62,11 @@ public class StackPointer {
     public void setValor(String valor) {
         this.valor = valor;
     }
+
+    @Override
+    public String toString() {
+        return "StackPointer{" + "pos=" + pos + ", id=" + id + '}';
+    }
+    
+    
 }

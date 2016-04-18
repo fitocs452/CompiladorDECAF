@@ -18,6 +18,7 @@ public class TablesGenerator<T> extends DECAF2BaseVisitor<Object> {
     private StructTable tablaEstructura = new StructTable();
     private Scope scopeActual;
     private ArrayList<MensajeLog> mensajes = new ArrayList();
+    private ArrayList<String> globalStruct = new ArrayList();
     
     // Pila dinámica que tienen como objetivo almacenar los valores literales temporalmente
     private Stack literalStack = new Stack();
@@ -410,7 +411,11 @@ public class TablesGenerator<T> extends DECAF2BaseVisitor<Object> {
                 }
                 Symbol simboloX = this.findSymbolInScopes(tipoExpresionAsignar);
                 //System.out.println("Mierda: " + simboloX);
-                if (simboloX.getType().getTypeName().contains(simbolo.getType().getTypeName())) {
+                //System.out.println("Tipo var: " + simbolo.getType().getTypeName());
+                //System.out.println("TIpo assign: " + simboloX.getType().getTypeName());
+                if (simboloX.getType().getTypeName().contains(simbolo.getType().getTypeName()) || 
+                    simbolo.getType().getTypeName().contains(simboloX.getType().getTypeName())
+                ) {
                     //System.out.println("Es correcta la asignación de tipo de variable");
                     String mensaje = ("En linea: " + ctx.getStart().getLine() + " Tipo de dato compatible");
                     this.mensajes.add(new MensajeLog(mensaje, false));
@@ -708,6 +713,13 @@ public class TablesGenerator<T> extends DECAF2BaseVisitor<Object> {
         }
     
         return (T)"int_literal_T";
+    }
+
+    @Override
+    public Object visitStructLocation(DECAF2Parser.StructLocationContext ctx) {
+        
+        
+        return super.visitStructLocation(ctx); //To change body of generated methods, choose Tools | Templates.
     }
     
     @Override public T visitStatement(@NotNull DECAF2Parser.StatementContext ctx) {
