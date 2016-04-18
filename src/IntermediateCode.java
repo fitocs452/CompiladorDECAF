@@ -123,4 +123,9 @@ public class IntermediateCode {
     public void setIsDeclaration(boolean isDeclaration) {
         this.isDeclaration = isDeclaration;
     }
+
+    @Override
+    public String toString() {
+        return "\n" + "firstDir=" + firstDir + ", secondDir=" + secondDir + ", res=" + res + ", operator=" + operator + ", label=" + label + "\n";
+    }
 }

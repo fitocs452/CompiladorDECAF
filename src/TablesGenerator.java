@@ -101,9 +101,10 @@ public class TablesGenerator<T> extends DECAF2BaseVisitor<Object> {
         Type tipoDato = new Type(type);
         tipoDato.setIsSimple(true);
 
-        if (this.findSymbolInScopes(id) != null) {
+        if (this.findSymbolInScopes(id, scopeActual) != null) {
             String mensaje = "Error linea: " + ctx.getStart().getLine() + " Variable ya declarada";
             this.mensajes.add(new MensajeLog(mensaje, true));
+            
             return null;
         }
         
@@ -403,8 +404,12 @@ public class TablesGenerator<T> extends DECAF2BaseVisitor<Object> {
             //System.out.println("No es un literal " + tipoExpresionAsignar + " Entonces, es método, variable, estructura o array");
             //System.out.println("---------------- " + tipoExpresionAsignar);
             if (!tipoExpresionAsignar.contains("error")) {
+                if (tipoExpresionAsignar.contains("[")) {
+                    int index = tipoExpresionAsignar.indexOf("[");
+                    tipoExpresionAsignar = tipoExpresionAsignar.substring(0, index);
+                }
                 Symbol simboloX = this.findSymbolInScopes(tipoExpresionAsignar);
-
+                //System.out.println("Mierda: " + simboloX);
                 if (simboloX.getType().getTypeName().contains(simbolo.getType().getTypeName())) {
                     //System.out.println("Es correcta la asignación de tipo de variable");
                     String mensaje = ("En linea: " + ctx.getStart().getLine() + " Tipo de dato compatible");
@@ -641,7 +646,11 @@ public class TablesGenerator<T> extends DECAF2BaseVisitor<Object> {
         }
         
         if (!secondOpType.contains("literal_T")) {
-            Symbol secondSymbol = this.findSymbolInScopes(secondOpType);
+            String find = secondOp;
+            if (secondOp.contains("[")) {
+                find = secondOp.substring(0, secondOp.indexOf("["));
+            }
+            Symbol secondSymbol = this.findSymbolInScopes(find);
             secondOpType = secondSymbol.getType().getTypeName();
         }
         
@@ -679,7 +688,11 @@ public class TablesGenerator<T> extends DECAF2BaseVisitor<Object> {
         }
         
         if (!secondOpType.contains("literal_T")) {
-            Symbol secondSymbol = this.findSymbolInScopes(secondOpType);
+            String find = secondOp;
+            if (secondOp.contains("[")) {
+                find = secondOp.substring(0, secondOp.indexOf("["));
+            }
+            Symbol secondSymbol = this.findSymbolInScopes(find);
             secondOpType = secondSymbol.getType().getTypeName();
         }
         

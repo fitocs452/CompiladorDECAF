@@ -58,7 +58,7 @@ public class Symbol {
 
     public String toString(){
         String temp = "";
-        temp += id + ": " + tipoDato.getTypeName();
+        temp += id + ": " + tipoDato.getTypeName() + "scope: " + this.ambito.getName();
         
         return temp;
     }

@@ -27,12 +27,27 @@ public class IntermediateCodeTable {
     
     public IntermediateCode searchCodeGlobal(String eval){        
         for (IntermediateCode ic: tableCodes) {
+            System.out.println("Label: " + ic.getLabel());
             String label = ic.getLabel().substring(0, ic.getLabel().indexOf("_"));
             if (ic.isGlobal()) {
                 if (label.equals(eval)) {
                     return ic;
                 }
             }
+        }
+        
+        return null;
+    }
+    
+    public IntermediateCode searchCode(String eval) {
+        System.out.println("TablaCödigo: " + tableCodes);
+        for (IntermediateCode ic: tableCodes) {
+            String label = ic.getLabel().substring(0, ic.getLabel().indexOf("_"));
+            //if (ic.isGlobal()) {
+                if (label.equals(eval)) {
+                    return ic;
+                }
+            //}
         }
         
         return null;
@@ -62,6 +77,7 @@ public class IntermediateCodeTable {
         }
         return null;
     }
+    
     
     @Override
     public String toString() {
