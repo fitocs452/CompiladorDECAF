@@ -1,4 +1,4 @@
-// Generated from C:\Users\GustavoAdolfo\Documents\NetBeansProjects\DECAF_GRAMMAR\src\DECAF2\DECAF2.g4 by ANTLR 4.4
+// Generated from /home/adolfo/Universidad/Compiladores/CompiladorDECAF/src/DECAF2/DECAF2.g4 by ANTLR 4.4
 package DECAF2;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
@@ -116,18 +116,6 @@ public interface DECAF2Listener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitBool_literal(@NotNull DECAF2Parser.Bool_literalContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code OrConditionExpr}
-	 * labeled alternative in {@link DECAF2Parser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterOrConditionExpr(@NotNull DECAF2Parser.OrConditionExprContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code OrConditionExpr}
-	 * labeled alternative in {@link DECAF2Parser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitOrConditionExpr(@NotNull DECAF2Parser.OrConditionExprContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link DECAF2Parser#rel_op}.
 	 * @param ctx the parse tree
@@ -331,18 +319,6 @@ public interface DECAF2Listener extends ParseTreeListener {
 	 */
 	void exitParameterType(@NotNull DECAF2Parser.ParameterTypeContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code SimpleAndExpr}
-	 * labeled alternative in {@link DECAF2Parser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterSimpleAndExpr(@NotNull DECAF2Parser.SimpleAndExprContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code SimpleAndExpr}
-	 * labeled alternative in {@link DECAF2Parser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitSimpleAndExpr(@NotNull DECAF2Parser.SimpleAndExprContext ctx);
-	/**
 	 * Enter a parse tree produced by the {@code AndConditionExpr}
 	 * labeled alternative in {@link DECAF2Parser#andExpr}.
 	 * @param ctx the parse tree
@@ -376,6 +352,16 @@ public interface DECAF2Listener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitExpressionNueva(@NotNull DECAF2Parser.ExpressionNuevaContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link DECAF2Parser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterExpression(@NotNull DECAF2Parser.ExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link DECAF2Parser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitExpression(@NotNull DECAF2Parser.ExpressionContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link DECAF2Parser#simpleVariable}.
 	 * @param ctx the parse tree

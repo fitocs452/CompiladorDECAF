@@ -1,4 +1,4 @@
-// Generated from C:\Users\GustavoAdolfo\Documents\NetBeansProjects\DECAF_GRAMMAR\src\DECAF2\DECAF2.g4 by ANTLR 4.4
+// Generated from /home/adolfo/Universidad/Compiladores/CompiladorDECAF/src/DECAF2/DECAF2.g4 by ANTLR 4.4
 package DECAF2;
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
@@ -1531,36 +1531,6 @@ public class DECAF2Parser extends Parser {
 	}
 
 	public static class ExpressionContext extends ParserRuleContext {
-		public ExpressionContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_expression; }
-	 
-		public ExpressionContext() { }
-		public void copyFrom(ExpressionContext ctx) {
-			super.copyFrom(ctx);
-		}
-	}
-	public static class SimpleAndExprContext extends ExpressionContext {
-		public AndExprContext andExpr() {
-			return getRuleContext(AndExprContext.class,0);
-		}
-		public SimpleAndExprContext(ExpressionContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof DECAF2Listener ) ((DECAF2Listener)listener).enterSimpleAndExpr(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof DECAF2Listener ) ((DECAF2Listener)listener).exitSimpleAndExpr(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof DECAF2Visitor ) return ((DECAF2Visitor<? extends T>)visitor).visitSimpleAndExpr(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-	public static class OrConditionExprContext extends ExpressionContext {
 		public AndExprContext andExpr() {
 			return getRuleContext(AndExprContext.class,0);
 		}
@@ -1568,18 +1538,21 @@ public class DECAF2Parser extends Parser {
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
 		}
-		public OrConditionExprContext(ExpressionContext ctx) { copyFrom(ctx); }
+		public ExpressionContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_expression; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof DECAF2Listener ) ((DECAF2Listener)listener).enterOrConditionExpr(this);
+			if ( listener instanceof DECAF2Listener ) ((DECAF2Listener)listener).enterExpression(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof DECAF2Listener ) ((DECAF2Listener)listener).exitOrConditionExpr(this);
+			if ( listener instanceof DECAF2Listener ) ((DECAF2Listener)listener).exitExpression(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof DECAF2Visitor ) return ((DECAF2Visitor<? extends T>)visitor).visitOrConditionExpr(this);
+			if ( visitor instanceof DECAF2Visitor ) return ((DECAF2Visitor<? extends T>)visitor).visitExpression(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -1600,10 +1573,6 @@ public class DECAF2Parser extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 			{
-			_localctx = new SimpleAndExprContext(_localctx);
-			_ctx = _localctx;
-			_prevctx = _localctx;
-
 			setState(246); andExpr(0);
 			}
 			_ctx.stop = _input.LT(-1);
@@ -1616,7 +1585,7 @@ public class DECAF2Parser extends Parser {
 					_prevctx = _localctx;
 					{
 					{
-					_localctx = new OrConditionExprContext(new ExpressionContext(_parentctx, _parentState));
+					_localctx = new ExpressionContext(_parentctx, _parentState);
 					pushNewRecursionContext(_localctx, _startState, RULE_expression);
 					setState(248);
 					if (!(precpred(_ctx, 1))) throw new FailedPredicateException(this, "precpred(_ctx, 1)");

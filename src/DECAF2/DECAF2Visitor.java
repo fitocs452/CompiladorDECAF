@@ -1,4 +1,4 @@
-// Generated from C:\Users\GustavoAdolfo\Documents\NetBeansProjects\DECAF_GRAMMAR\src\DECAF2\DECAF2.g4 by ANTLR 4.4
+// Generated from /home/adolfo/Universidad/Compiladores/CompiladorDECAF/src/DECAF2/DECAF2.g4 by ANTLR 4.4
 package DECAF2;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
@@ -75,13 +75,6 @@ public interface DECAF2Visitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitBool_literal(@NotNull DECAF2Parser.Bool_literalContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code OrConditionExpr}
-	 * labeled alternative in {@link DECAF2Parser#expression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitOrConditionExpr(@NotNull DECAF2Parser.OrConditionExprContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link DECAF2Parser#rel_op}.
 	 * @param ctx the parse tree
@@ -204,13 +197,6 @@ public interface DECAF2Visitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitParameterType(@NotNull DECAF2Parser.ParameterTypeContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code SimpleAndExpr}
-	 * labeled alternative in {@link DECAF2Parser#expression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSimpleAndExpr(@NotNull DECAF2Parser.SimpleAndExprContext ctx);
-	/**
 	 * Visit a parse tree produced by the {@code AndConditionExpr}
 	 * labeled alternative in {@link DECAF2Parser#andExpr}.
 	 * @param ctx the parse tree
@@ -230,6 +216,12 @@ public interface DECAF2Visitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitExpressionNueva(@NotNull DECAF2Parser.ExpressionNuevaContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link DECAF2Parser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExpression(@NotNull DECAF2Parser.ExpressionContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link DECAF2Parser#simpleVariable}.
 	 * @param ctx the parse tree

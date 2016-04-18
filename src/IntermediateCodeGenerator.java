@@ -1,6 +1,7 @@
 import DECAF2.DECAF2BaseVisitor;
 import DECAF2.DECAF2Parser;
 import java.util.ArrayList;
+import java.util.Stack;
 import org.antlr.v4.runtime.misc.NotNull;
 
 public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
@@ -9,6 +10,8 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
     private TablesGenerator tablas;
     private Scope scopeActual;
     private ArrayList<StackPointer> stack;
+    private int contTempVars = 0;
+    private ArrayList<String> booleanDataTypes;
     
     private final int BOOL_OFFSET = 4;
     private final int INT_OFFSET = 4;
@@ -23,7 +26,12 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
         stack = new ArrayList();
         scopeActual = new Scope();
         
+        booleanDataTypes = new ArrayList();
+        booleanDataTypes.add("true");
+        booleanDataTypes.add("false");
+        
         this.visitPrograma(tree);
+        Scope.ambitoActual = 0;
     }
     
     @Override
@@ -100,14 +108,56 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
     public Object visitAssign(DECAF2Parser.AssignContext ctx) {
         boolean isSimpleLocation = true;
         String result = ((String)visit(ctx.getChild(0)));
-        Symbol simbolo = tablaCodigo.findSymbolInGlobalScope(result, scopeActual);
+        IntermediateCode codigo = new IntermediateCode();
+        System.out.println("Result: " + result + " of visit: " + ctx.getChild(0).getText());
+        if (result.contains("[")) {
+            isSimpleLocation = false;
+        }
         
-        if (simbolo != null) {
-            IntermediateCode code = this.tablaCodigo.searchCodeGlobal(result);
-            result = code.getLabel();
-           
-        } else {
-           result = "stack[" + this.findPosInStackById(result) + "]";
+        if (isSimpleLocation) {
+            Symbol simbolo = tablaCodigo.findSymbolInGlobalScope(result, scopeActual);
+
+            System.out.println("Simbolo a buscar: " + result  + " encontrado: " + simbolo);
+            if (simbolo != null) {
+                IntermediateCode code = this.tablaCodigo.searchCodeGlobal(result);
+                result = code.getLabel();
+
+            } else {
+               result = "stack[" + this.findPosInStackById(result) + "]";
+            }
+        
+            /*
+            Se uitlizarán variables que representan las direccions (dir1, dir2)
+            */
+            String dir1;
+            T eval = (T)visit(ctx.getChild(2));
+
+            if (eval instanceof IntermediateCode ) {
+                dir1 = ((IntermediateCode)eval).getRes();
+            } else if (eval instanceof ArrayList) {
+                if (((ArrayList)eval).get(0) instanceof String) {
+                    dir1 = ((String)((ArrayList)eval).get(0));
+                } else {
+                    dir1 = ((IntermediateCode)((ArrayList)eval).get(0)).getRes();
+                }
+            } else {
+                dir1 = (String)eval;
+            }
+            
+            if (booleanDataTypes.contains(dir1)) {
+                if (dir1.equals("true")) {
+                    dir1 = "1";
+                } else {
+                    dir1 = "0";
+                }
+            }
+            
+            codigo.setFirstDir(dir1);
+            codigo.setOperator("=");
+            
+            codigo.setRes(result);
+            tablaCodigo.addCodigo(codigo);
+            this.contTempVars = 0;
         }
         
         return super.visitAssign(ctx);
@@ -211,12 +261,134 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
 
     @Override
     public Object visitAddDiffExpr(DECAF2Parser.AddDiffExprContext ctx) {
-        return super.visitAddDiffExpr(ctx); //To change body of generated methods, choose Tools | Templates.
+        String firstOpTmp = "";
+        String secondOpTmp = "";
+        
+        String firstOp = "";
+        String secondOp = "";
+        
+        Stack<String> operators = new Stack();
+        int countOperators = 0;
+        
+        for (int i = 0; i < ctx.getChildCount() ;i++) {
+            T value = (T) this.visit(ctx.getChild(i));
+            if (value instanceof IntermediateCode) {
+                countOperators++;
+                operators.push(((IntermediateCode)value).getRes());
+            }
+        }
+        
+        if (countOperators > 1) {
+            firstOpTmp = operators.pop();
+            firstOp= firstOpTmp;
+        }
+        if (firstOpTmp.isEmpty()){
+            firstOp = (String)this.visit(ctx.getChild(0));
+        }
+        
+        if (countOperators >= 2){
+            secondOpTmp = operators.pop();
+            secondOp= secondOpTmp;
+        }
+        if (firstOpTmp.isEmpty()){
+            secondOp = (String)this.visit(ctx.getChild(2));
+        }
+        
+        IntermediateCode ic = new IntermediateCode(
+                firstOp,
+                secondOp,
+                ctx.getChild(1).getText()
+        );
+        
+        ic.setRes("temp" + this.contTempVars++);
+        this.tablaCodigo.addCodigo(ic);
+        
+        return ic;
     }
 
     @Override
+    public Object visitUnaryExpr(DECAF2Parser.UnaryExprContext ctx) {
+         return visit(ctx.getChild(0)); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    @Override
     public Object visitMultDivExpr(DECAF2Parser.MultDivExprContext ctx) {
-        return super.visitMultDivExpr(ctx); //To change body of generated methods, choose Tools | Templates.
+        String firstOpTmp = "";
+        String secondOpTmp = "";
+        
+        String firstOp = "";
+        String secondOp = "";
+        
+        Stack<String> operators = new Stack();
+        int countOperators = 0;
+        
+        for (int i = 0; i < ctx.getChildCount() ;i++) {
+            T value = (T) this.visit(ctx.getChild(i));
+            if (value instanceof IntermediateCode) {
+                countOperators++;
+                operators.push(((IntermediateCode)value).getRes());
+            }
+        }
+        
+        if (countOperators > 1) {
+            firstOpTmp = operators.pop();
+            firstOp= firstOpTmp;
+        }
+        if (firstOpTmp.isEmpty()){
+            firstOp = (String)this.visit(ctx.getChild(0));
+        }
+        
+        if (countOperators >= 2){
+            secondOpTmp = operators.pop();
+            secondOp= secondOpTmp;
+        }
+        if (firstOpTmp.isEmpty()){
+            secondOp = (String)this.visit(ctx.getChild(2));
+        }
+        
+        IntermediateCode ic = new IntermediateCode(
+                firstOp,
+                secondOp,
+                ctx.getChild(1).getText()
+        );
+        
+        ic.setRes("temp" + this.contTempVars++);
+        this.tablaCodigo.addCodigo(ic);
+        
+        return ic;
+    }
+
+    @Override
+    public Object visitExpression(DECAF2Parser.ExpressionContext ctx) {
+        ArrayList returnArray = new ArrayList();
+        
+        if (ctx.getChildCount() < 2) {
+            T valor = (T)visit(ctx.getChild(0));
+            if (valor instanceof IntermediateCode) {
+                returnArray.add(valor);
+                return returnArray;
+            } else if (valor instanceof ArrayList) {
+                returnArray.addAll((ArrayList) valor);
+                return returnArray;
+            } else {
+                returnArray.add(valor);
+                return returnArray;
+            }
+        }
+        
+        for (int i = 0; i < ctx.getChildCount(); i++) {
+            T expr1 = (T)visit(ctx.getChild(i));
+            
+            if (expr1 instanceof ArrayList) {
+               returnArray.addAll((ArrayList)expr1);
+            } else if (expr1 instanceof IntermediateCode) {
+               returnArray.add(expr1);
+            } else {
+                returnArray.add(expr1);
+            }  
+        }
+        
+        return returnArray;
     }
     
     @Override
@@ -234,12 +406,34 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
         return super.visitBool_literal(ctx);
     }
     
-   public int findPosInStackById(String eval){
-       for(StackPointer sp: this.stack){
-           if (sp.getId().equals(eval)) {
-               return sp.getPos();
-           }
-       }
-       return -1;
-   }
+    public int findPosInStackById(String eval) {
+        for(StackPointer sp: this.stack) {
+            if (sp.getId().equals(eval)) {
+                return sp.getPos();
+            }
+        }
+        return -1;
+    }
+
+    @Override
+    public Object visitSimpleVariable(DECAF2Parser.SimpleVariableContext ctx) {
+        return ctx.getText(); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    public IntermediateCodeTable getTablaCodigo() {
+        return tablaCodigo;
+    }
+
+    public void setTablaCodigo(IntermediateCodeTable tablaCodigo) {
+        this.tablaCodigo = tablaCodigo;
+    }
+
+    @Override
+    public Object visitValue(DECAF2Parser.ValueContext ctx) {
+        IntermediateCode codigo = new IntermediateCode();
+        codigo.setRes(ctx.getChild(0).getChild(0).getText());
+        
+        return codigo; //To change body of generated methods, choose Tools | Templates.
+    }
+    
 }

@@ -1,4 +1,4 @@
-// Generated from C:\Users\GustavoAdolfo\Documents\NetBeansProjects\DECAF_GRAMMAR\src\DECAF2\DECAF2.g4 by ANTLR 4.4
+// Generated from /home/adolfo/Universidad/Compiladores/CompiladorDECAF/src/DECAF2/DECAF2.g4 by ANTLR 4.4
 package DECAF2;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;

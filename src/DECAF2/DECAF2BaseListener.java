@@ -1,4 +1,4 @@
-// Generated from C:\Users\GustavoAdolfo\Documents\NetBeansProjects\DECAF_GRAMMAR\src\DECAF2\DECAF2.g4 by ANTLR 4.4
+// Generated from /home/adolfo/Universidad/Compiladores/CompiladorDECAF/src/DECAF2/DECAF2.g4 by ANTLR 4.4
 package DECAF2;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -132,18 +132,6 @@ public class DECAF2BaseListener implements DECAF2Listener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitBool_literal(@NotNull DECAF2Parser.Bool_literalContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterOrConditionExpr(@NotNull DECAF2Parser.OrConditionExprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitOrConditionExpr(@NotNull DECAF2Parser.OrConditionExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -389,18 +377,6 @@ public class DECAF2BaseListener implements DECAF2Listener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSimpleAndExpr(@NotNull DECAF2Parser.SimpleAndExprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitSimpleAndExpr(@NotNull DECAF2Parser.SimpleAndExprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterAndConditionExpr(@NotNull DECAF2Parser.AndConditionExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -432,6 +408,18 @@ public class DECAF2BaseListener implements DECAF2Listener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitExpressionNueva(@NotNull DECAF2Parser.ExpressionNuevaContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterExpression(@NotNull DECAF2Parser.ExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitExpression(@NotNull DECAF2Parser.ExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

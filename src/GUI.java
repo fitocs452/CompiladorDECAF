@@ -509,6 +509,16 @@ public class GUI extends javax.swing.JFrame {
 
     private void generarCodigoIntermedio(TablesGenerator tablas, DECAF2Parser.ProgramaContext tree) {
         IntermediateCodeGenerator codigoIntermedio = new IntermediateCodeGenerator(tablas, tree);
+        
+        JTextPane log = new JTextPane();
+        log.setFont(new java.awt.Font("Eras Medium ITC", 0, 15));
+        
+        log.setText(codigoIntermedio.getTablaCodigo().toString());
+        
+        JScrollPane scroll = new JScrollPane();
+        scroll.setViewportView(log);
+        
+        jTabbedPane3.addTab("Código Intermedio", scroll);
     }
     
     public void openFile() {

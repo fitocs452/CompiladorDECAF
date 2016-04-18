@@ -62,4 +62,41 @@ public class IntermediateCodeTable {
         }
         return null;
     }
+    
+    @Override
+    public String toString() {
+        String returnString = "";
+        for (int i = 0;i<this.tableCodes.size();i++){
+            String etiqueta = tableCodes.get(i).getLabel();
+            String dir1 = tableCodes.get(i).getFirstDir();
+            String dir2 = tableCodes.get(i).getSecondDir();
+            String op = tableCodes.get(i).getOperator();
+            String res = tableCodes.get(i).getRes();
+            boolean global = tableCodes.get(i).isGlobal();
+            boolean stIF = tableCodes.get(i).isIfStatement();
+            String bandera = tableCodes.get(i).getBandera();
+            IntermediateCode gotoL = tableCodes.get(i).getGotoLabel();
+            boolean declaration = tableCodes.get(i).isDeclaration();
+            if (etiqueta != null && global == false && declaration == false){
+                returnString += etiqueta + "\n";
+            }
+            if (dir1 != null && dir2 != null && op != null && res != null && !stIF){
+                returnString += res +" = "+ dir1 +" "+ op +" "+ dir2+"\n";
+            }
+            if (dir1 != null && dir2 == null && op != null && res != null){
+                returnString += res +" "+ op +" "+ dir1+ "\n";
+            }
+            if (global == true){
+                returnString += ".global " + etiqueta +"\n";
+               // returnString += etiqueta +": word 0" + "\n";
+            }
+            if (stIF){
+                returnString += res +" "+ dir1+" " + op +" "+ dir2 + "\n";
+            }
+            if (dir1 == null && op != null && dir2 != null){
+                returnString += op +" "+ dir2 + "\n";
+            }   
+        }
+       return returnString;
+    }
 }

@@ -93,8 +93,8 @@ exp1: '(' expression ')';
 		
 expressionNueva: expression | ;
 
-expression : andExpr                    #SimpleAndExpr
-        | expression OR andExpr         #OrConditionExpr
+expression : andExpr                    
+        | expression OR andExpr         
         ;
 
 andExpr: eqExpr                         #SimpleEqExpr

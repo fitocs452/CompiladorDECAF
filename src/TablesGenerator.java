@@ -587,12 +587,6 @@ public class TablesGenerator<T> extends DECAF2BaseVisitor<Object> {
         return (T)visitChildren(ctx);
     }
     
-    // Condiciones anidadas con OR
-    @Override
-    public T visitOrConditionExpr(@NotNull DECAF2Parser.OrConditionExprContext ctx) {
-        return (T)visitChildren(ctx);
-    }
-    
     // Condiciones anidadas con AND
     @Override
     public T visitAndConditionExpr(@NotNull DECAF2Parser.AndConditionExprContext ctx) {
