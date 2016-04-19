@@ -191,7 +191,7 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
             String res = "";
             ArrayList loctArray = (ArrayList)visit(ctx.getChild(0));
             String nombreVar = (String)loctArray.get(0);
-            int posArray = (int)loctArray.get(1) - 1;
+            int posArray = (int)loctArray.get(1);
             if (posArray == -1) {
                 posArray = 0;
             }
@@ -387,13 +387,20 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
                 if (arrayVar.contains("[")) {
                     arrayVar = this.processArrayVariable(arrayVar);
                 }
+                if (!arrayVar.contains("[")) {
+                    arrayVar = this.processSimpleVariable(arrayVar);
+                }
+                if (arrayVar.isEmpty()) {
+                    arrayVar = ((IntermediateCode)value).getRes(); 
+                }
                 operators.push(arrayVar);
             }
         }
         
         if (countOperators > 1) {
             firstOpTmp = operators.pop();
-            firstOp= firstOpTmp;
+            firstOp = firstOpTmp;
+            System.out.println(firstOp);
         }
         if (firstOpTmp.isEmpty()) {
             Object eval = this.visit(ctx.getChild(0));
@@ -402,6 +409,12 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
                 if (firstOp.contains("[")) {
                     firstOp = processArrayVariable(firstOp);
                 }
+                if (!firstOp.contains("[")) {
+                    firstOp = processSimpleVariable(firstOp);
+                }
+                if (firstOp.isEmpty()) {
+                    firstOp = ((IntermediateCode)eval).getRes(); 
+                }
             } else {
                 firstOp = (String)this.visit(ctx.getChild(0));
             }
@@ -409,7 +422,7 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
         
         if (countOperators >= 2) {
             secondOpTmp = operators.pop();
-            secondOp= secondOpTmp;
+            secondOp = secondOpTmp;
         }
         if (firstOpTmp.isEmpty()) {
             Object eval = this.visit(ctx.getChild(2));
@@ -417,6 +430,12 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
                 secondOp = ((IntermediateCode)eval).getRes();
                 if (secondOp.contains("[")) {
                     secondOp = processArrayVariable(secondOp);
+                }
+                if (!secondOp.contains("[")) {
+                    secondOp = processSimpleVariable(secondOp);
+                }
+                if (secondOp.isEmpty()) {
+                    secondOp = ((IntermediateCode)eval).getRes(); 
                 }
             } else {
                 secondOp = (String)this.visit(ctx.getChild(2));
@@ -574,6 +593,7 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
 
     @Override
     public Object visitSimpleVariable(DECAF2Parser.SimpleVariableContext ctx) {
+        
         return ctx.getText(); //To change body of generated methods, choose Tools | Templates.
     }
     
@@ -607,7 +627,7 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
 
     public String processArrayVariable(String arrayVar) {
         String nombreVar = arrayVar.substring(0, arrayVar.indexOf("["));
-        int indexVar = Integer.parseInt(arrayVar.substring(arrayVar.indexOf("[") + 1, arrayVar.indexOf("]"))) - 1;
+        int indexVar = Integer.parseInt(arrayVar.substring(arrayVar.indexOf("[") + 1, arrayVar.indexOf("]")));
         if (indexVar == -1) {
             indexVar = 0;
         }
@@ -619,7 +639,7 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
             if (buscado.getTipo().equals("int")||buscado.getTipo().equals("boolean")) {
                 searchStack= this.findPosInStackById(nombreVar) + indexVar * BOOL_OFFSET;
             } else {
-                searchStack = this.findPosInStackById(nombreVar) + indexVar * INT_OFFSET;
+                searchStack = this.findPosInStackById(nombreVar) + indexVar * CHAR_OFFSET;
             }
             return "stack[" + searchStack + "]";
         } catch(Exception e) {
@@ -636,6 +656,30 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
                     index = indexVar * CHAR_OFFSET;
                 }
                 returnSTR = globalCode.getLabel() + "[" + index + "]";
+            }
+        }
+        return returnSTR;
+    }
+    
+    public String processSimpleVariable(String simple) {
+        String returnSTR = "";
+        try {
+            StackPointer buscado = this.findStackPointerInStack(simple);
+            int searchStack;
+            if (buscado.getTipo().equals("int")||buscado.getTipo().equals("boolean")) {
+                searchStack= this.findPosInStackById(simple);
+            } else {
+                searchStack = this.findPosInStackById(simple);
+            }
+            return "stack[" + searchStack + "]";
+        } catch(Exception e) {
+            Symbol gbl = this.tablaCodigo.findSymbolInGlobalScope(simple, scopeActual);
+            if (gbl != null) {
+                IntermediateCode globalCode = this.tablaCodigo.searchCodeGlobal(simple);
+                Symbol simbolo_1 = this.tablaCodigo.findSymbolInScopes(simple, scopeActual);
+                String tipo = ((Type)simbolo_1.getType()).getTypeName();
+
+                returnSTR = globalCode.getLabel();
             }
         }
         return returnSTR;
