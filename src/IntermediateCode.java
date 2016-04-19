@@ -11,6 +11,7 @@ public class IntermediateCode {
     private String lenght;
     private String label;
     private String type;
+    private int pos;
     
     // Atributos verificadores
     private boolean isGlobal;

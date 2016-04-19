@@ -12,18 +12,18 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
     private ArrayList<StackPointer> stack;
     private int contTempVars = 0;
     private ArrayList<String> booleanDataTypes;
+    private ArrayList<GlobalStackPointer> stackGlobal; 
     
     private final int BOOL_OFFSET = 4;
     private final int INT_OFFSET = 4;
     private final int CHAR_OFFSET = 4;
 
     public IntermediateCodeGenerator(TablesGenerator tablas, DECAF2Parser.ProgramaContext tree) {
-        
-        System.out.println("Generar código intermedio ---------------------------");
         this.tablas = tablas;
         
         tablaCodigo = new IntermediateCodeTable(tablas);
         stack = new ArrayList();
+        stackGlobal = new ArrayList();
         scopeActual = new Scope();
         
         booleanDataTypes = new ArrayList();
@@ -45,9 +45,10 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
         String id = ctx.getChild(1).getText();
         int lenght = Integer.parseInt(ctx.getChild(3).getText());
         
-        IntermediateCode codigo = new IntermediateCode();
         if (scopeActual.getName() == 0) {
-           
+            this.stackGlobal.add(new GlobalStackPointer(INT_OFFSET * lenght, id, tipo));
+            IntermediateCode codigo = new IntermediateCode();
+            
             codigo.setLabel(ctx.getChild(1).getText() + "_global");
             codigo.setIsGlobal(true);
             tablaCodigo.addCodigo(codigo);
@@ -74,16 +75,16 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
     @Override
     public Object visitSimpleVarDeclaration(DECAF2Parser.SimpleVarDeclarationContext ctx) {
         IntermediateCode codigo = new IntermediateCode();
+        String tipo = ctx.getChild(0).getText();
+        String id = ctx.getChild(1).getText();
         
         if (scopeActual.getName() == 0) {
+            this.stackGlobal.add(new GlobalStackPointer(INT_OFFSET, id, tipo));
             codigo.setLabel(ctx.getChild(1).getText() + "_global");
             codigo.setIsGlobal(true);
             tablaCodigo.addCodigo(codigo);
             return super.visitSimpleVarDeclaration(ctx);
         }
-        
-        String tipo = ctx.getChild(0).getText();
-        String id = ctx.getChild(1).getText();
         
         switch (tipo) {
             case "int":
@@ -119,15 +120,14 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
             Symbol simbolo = tablaCodigo.findSymbolInGlobalScope(result, scopeActual);
 
             if (simbolo != null) {
-                IntermediateCode code = this.tablaCodigo.searchCodeGlobal(result);
-                result = code.getLabel();
-
+                GlobalStackPointer globalSP = this.findGlobalSPInGlobalStack(result);
+                
+                //IntermediateCode code = this.tablaCodigo.searchCodeGlobal(result);
+                //result = code.getLabel();
+                result = "stack_global[" + globalSP.getPos() + "]";
             } else {
-                System.out.println("Pos id encontrado: " + this.findStackPointerInStack(result));
                 result = "stack[" + this.findPosInStackById(result) + "]";
             }
-            
-            System.out.println("Result: " + result);
             
             /*
             Se uitlizarán variables que representan las direccions (dir1, dir2)
@@ -349,6 +349,7 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
         
         scopeActual = scopeActual.getAnterior();
         StackPointer.globalPos = 0;
+        GlobalStackPointer.staticPos = 0;
         
         return null;
     }
@@ -365,6 +366,7 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
         
         scopeActual = scopeActual.getAnterior();
         StackPointer.globalPos = 0;
+        GlobalStackPointer.staticPos = 0;
         return null; //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -477,6 +479,12 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
                 if (arrayVar.contains("[")) {
                     arrayVar = this.processArrayVariable(arrayVar);
                 }
+                if (!arrayVar.contains("[")) {
+                    arrayVar = this.processSimpleVariable(arrayVar);
+                }
+                if (arrayVar.isEmpty()) {
+                    arrayVar = ((IntermediateCode)value).getRes(); 
+                }
                 operators.push(arrayVar);
             }
         }
@@ -491,6 +499,12 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
                 firstOp = ((IntermediateCode)eval).getRes();
                 if (firstOp.contains("[")) {
                     firstOp = processArrayVariable(firstOp);
+                }
+                if (!firstOp.contains("[")) {
+                    firstOp = processSimpleVariable(firstOp);
+                }
+                if (firstOp.isEmpty()) {
+                    firstOp = ((IntermediateCode)eval).getRes(); 
                 }
             } else {
                 firstOp = (String)this.visit(ctx.getChild(0));
@@ -507,6 +521,12 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
                 secondOp = ((IntermediateCode)eval).getRes();
                 if (secondOp.contains("[")) {
                     secondOp = processArrayVariable(secondOp);
+                }
+                if (!secondOp.contains("[")) {
+                    secondOp = processSimpleVariable(secondOp);
+                }
+                if (secondOp.isEmpty()) {
+                    secondOp = ((IntermediateCode)eval).getRes(); 
                 }
             } else {
                 secondOp = (String)this.visit(ctx.getChild(2));
@@ -579,17 +599,39 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
                 return sp.getPos();
             }
         }
+        
         return -1;
     }
     
-     public StackPointer findStackPointerInStack(String identificador){
-       for(StackPointer sp: this.stack){
+    public int findPosInGlobalStackById(String eval) {
+        for(GlobalStackPointer sp: this.stackGlobal) {
+            if (sp.getId().equals(eval)) {
+                return sp.getPos();
+            }
+        }
+        
+        return -1;
+    }
+    
+    public StackPointer findStackPointerInStack(String identificador){
+        for(StackPointer sp: this.stack){
+            if (sp.getId().equals(identificador)){
+                return sp;
+            }
+        }
+        
+        return null;
+    }
+    
+    public GlobalStackPointer findGlobalSPInGlobalStack(String identificador){
+       for(GlobalStackPointer sp: this.stackGlobal){
            if (sp.getId().equals(identificador)){
                return sp;
            }
        }
+       
        return null;
-   }
+    }
 
     @Override
     public Object visitSimpleVariable(DECAF2Parser.SimpleVariableContext ctx) {
@@ -632,30 +674,20 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
             indexVar = 0;
         }
         
-        String returnSTR = "";
+        String returnSTR = nombreVar;
         try {
             StackPointer buscado = this.findStackPointerInStack(nombreVar);
-            int searchStack;
-            if (buscado.getTipo().equals("int")||buscado.getTipo().equals("boolean")) {
-                searchStack= this.findPosInStackById(nombreVar) + indexVar * BOOL_OFFSET;
-            } else {
-                searchStack = this.findPosInStackById(nombreVar) + indexVar * CHAR_OFFSET;
-            }
+            int i = buscado.getPos();
+            int searchStack = this.findPosInStackById(nombreVar) + indexVar * INT_OFFSET;
             return "stack[" + searchStack + "]";
         } catch(Exception e) {
             Symbol gbl = this.tablaCodigo.findSymbolInGlobalScope(nombreVar, scopeActual);
             if (gbl != null) {
-                IntermediateCode globalCode = this.tablaCodigo.searchCodeGlobal(nombreVar);
-                Symbol simbolo_1 = this.tablaCodigo.findSymbolInScopes(nombreVar, scopeActual);
-                String tipo = ((Type)simbolo_1.getType()).getTypeName();
-                int index = 0;
-                if (tipo.contains("int")||tipo.contains("boolean")) {
-                    index = indexVar * INT_OFFSET;
-                }
-                if (tipo.contains("char")) {
-                    index = indexVar * CHAR_OFFSET;
-                }
-                returnSTR = globalCode.getLabel() + "[" + index + "]";
+                //IntermediateCode globalCode = this.tablaCodigo.searchCodeGlobal(nombreVar);
+                GlobalStackPointer globalSP = this.findGlobalSPInGlobalStack(nombreVar);
+                
+                int index = globalSP.getPos() + indexVar * INT_OFFSET;
+                return "stack_global[" + index + "]";
             }
         }
         return returnSTR;
@@ -665,21 +697,17 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
         String returnSTR = "";
         try {
             StackPointer buscado = this.findStackPointerInStack(simple);
-            int searchStack;
-            if (buscado.getTipo().equals("int")||buscado.getTipo().equals("boolean")) {
-                searchStack= this.findPosInStackById(simple);
-            } else {
-                searchStack = this.findPosInStackById(simple);
-            }
+            int i = buscado.getPos();
+            int searchStack = this.findPosInStackById(simple);
+            
             return "stack[" + searchStack + "]";
         } catch(Exception e) {
             Symbol gbl = this.tablaCodigo.findSymbolInGlobalScope(simple, scopeActual);
             if (gbl != null) {
-                IntermediateCode globalCode = this.tablaCodigo.searchCodeGlobal(simple);
-                Symbol simbolo_1 = this.tablaCodigo.findSymbolInScopes(simple, scopeActual);
-                String tipo = ((Type)simbolo_1.getType()).getTypeName();
+                //IntermediateCode globalCode = this.tablaCodigo.searchCodeGlobal(simple);
+                GlobalStackPointer globalSP = this.findGlobalSPInGlobalStack(simple);
 
-                returnSTR = globalCode.getLabel();
+                returnSTR = "stack_global[" + globalSP.getPos() + "]";
             }
         }
         return returnSTR;
