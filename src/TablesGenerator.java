@@ -409,24 +409,52 @@ public class TablesGenerator<T> extends DECAF2BaseVisitor<Object> {
                     int index = tipoExpresionAsignar.indexOf("[");
                     tipoExpresionAsignar = tipoExpresionAsignar.substring(0, index);
                 }
-                Symbol simboloX = this.findSymbolInScopes(tipoExpresionAsignar);
-                //System.out.println("Mierda: " + simboloX);
-                //System.out.println("Tipo var: " + simbolo.getType().getTypeName());
-                //System.out.println("TIpo assign: " + simboloX.getType().getTypeName());
-                if (simboloX.getType().getTypeName().contains(simbolo.getType().getTypeName()) || 
-                    simbolo.getType().getTypeName().contains(simboloX.getType().getTypeName())
+                //System.out.println("Busar a mierda: " + tipoExpresionAsignar);
+                String type = "";
+                if (tipoExpresionAsignar.contains("char") ||
+                    tipoExpresionAsignar.contains("int") ||
+                    tipoExpresionAsignar.contains("bool")
                 ) {
-                    //System.out.println("Es correcta la asignación de tipo de variable");
-                    String mensaje = ("En linea: " + ctx.getStart().getLine() + " Tipo de dato compatible");
-                    this.mensajes.add(new MensajeLog(mensaje, false));
-                } else {
-                    //System.out.println("Es incorrecta la asignación por los tipos");
-                    String mensaje = ("Error linea: " + ctx.getStart().getLine() + " Tipo de datos no compatibles");
-                    this.mensajes.add(new MensajeLog(mensaje, true));
+                    type = tipoExpresionAsignar;
                 }
+                
+                if (type.isEmpty()) {
+                    Symbol simboloX = this.findSymbolInScopes(tipoExpresionAsignar);
+                    //System.out.println("Mierda: " + simboloX);
+                    //System.out.println("Simbolo m2: " + simbolo);
+
+                    //System.out.println("Tipo var: " + simbolo.getType().getTypeName());
+                    //System.out.println("TIpo assign: " + simboloX.getType().getTypeName());
+                    if (simboloX.getType().getTypeName().contains(simbolo.getType().getTypeName()) || 
+                        simbolo.getType().getTypeName().contains(simboloX.getType().getTypeName())
+                    ) {
+                        //System.out.println("Es correcta la asignación de tipo de variable");
+                        String mensaje = ("En linea: " + ctx.getStart().getLine() + " Tipo de dato compatible");
+                        this.mensajes.add(new MensajeLog(mensaje, false));
+                    } else {
+                        //System.out.println("Es incorrecta la asignación por los tipos");
+                        String mensaje = ("Error linea: " + ctx.getStart().getLine() + " Tipo de datos no compatibles");
+                        this.mensajes.add(new MensajeLog(mensaje, true));
+                    }
+                } else {
+                    if (type.contains(simbolo.getType().getTypeName()) || 
+                        simbolo.getType().getTypeName().contains(type)
+                    ) {
+                        //System.out.println("Es correcta la asignación de tipo de variable");
+                        String mensaje = ("En linea: " + ctx.getStart().getLine() + " Tipo de dato compatible");
+                        this.mensajes.add(new MensajeLog(mensaje, false));
+                    } else {
+                        //System.out.println("Es incorrecta la asignación por los tipos");
+                        String mensaje = ("Error linea: " + ctx.getStart().getLine() + " Tipo de datos no compatibles");
+                        this.mensajes.add(new MensajeLog(mensaje, true));
+                    }
+                }
+
             }
         }
-
+        //System.out.println("GS: " + globalStruct);
+        this.globalStruct = new ArrayList();
+        //System.out.println("GS: " + globalStruct);
         return (T)this.visitChildren(ctx);
     }
     
@@ -633,43 +661,71 @@ public class TablesGenerator<T> extends DECAF2BaseVisitor<Object> {
     // Suma y resta
     @Override
     public T visitAddDiffExpr(@NotNull DECAF2Parser.AddDiffExprContext ctx) {
-        String firstOpType = (String)this.visit(ctx.getChild(0));
-        String secondOpType = (String)this.visit(ctx.getChild(2));
+        String firstOpType = "";
+        String secondOpType = "";
+        
+        Object fOP = this.visit(ctx.getChild(0));
+        Object sOP = this.visit(ctx.getChild(2));
+        
+        if (fOP instanceof ArrayList) {
+            firstOpType = (String)((ArrayList)fOP).get(0);
+        } else {
+            firstOpType = (String)fOP;
+        }
+        
+        if (sOP instanceof ArrayList) {
+            secondOpType = (String)((ArrayList)sOP).get(0);
+        } else {
+            secondOpType = (String)sOP;
+        }
         
         String firstOp = (String)(ctx.getChild(0).getChild(0).getText());
         String secondOp = (String)(ctx.getChild(2).getChild(0).getText());
         
-        if (!firstOpType.contains("literal_T")){
-            Symbol firstSymbol = this.findSymbolInScopes(firstOp);
-            if (firstSymbol != null)
-                firstOpType = firstSymbol.getType().getTypeName();
-            else{
-                for (int j = 0; j < ctx.getChildCount(); j++) {
-                    visit(ctx.getChild(j));
-                }
+        if (!firstOpType.contains("literal_T") && !firstOpType.contains(".") && !firstOpType.equals("char") && !firstOpType.equals("int") && !firstOpType.equals("bool")) {
+            String find = firstOp;
+            if (firstOp.contains("[")) {
+                find = firstOp.substring(0, firstOp.indexOf("["));
             }
+            Symbol firstSymbol = this.findSymbolInScopes(find);
+            if (firstSymbol != null) {
+                firstOpType = firstSymbol.getType().getTypeName();
+            } else {
+                String mensaje = "Error linea: " + ctx.getStart().getLine() + " No existe variable";
+                this.mensajes.add(new MensajeLog(mensaje, true));
+                return (T)"error_literal";
+            }
+            
         }
         
-        if (!secondOpType.contains("literal_T")) {
+        if (!secondOpType.contains("literal_T") && !secondOpType.contains(".") && !secondOpType.equals("char") && !secondOpType.equals("int") && !secondOpType.equals("bool")) {
             String find = secondOp;
             if (secondOp.contains("[")) {
                 find = secondOp.substring(0, secondOp.indexOf("["));
             }
             Symbol secondSymbol = this.findSymbolInScopes(find);
-            secondOpType = secondSymbol.getType().getTypeName();
+            if (secondSymbol != null) {
+                secondOpType = secondSymbol.getType().getTypeName();
+            } else {
+                String mensaje = "Error linea: " + ctx.getStart().getLine() + " No existe variable";
+                this.mensajes.add(new MensajeLog(mensaje, true));
+                return (T)"error_literal";
+            }
         }
         
         if (!firstOpType.contains("int")) {
             String mensaje = "Error linea: " + ctx.getStart().getLine() + " Valor: " + firstOp + " No es un número entero";
             this.mensajes.add(new MensajeLog(mensaje, true));
+            this.globalStruct = new ArrayList();
             return (T)"error_literal";
         }
         if(!secondOpType.contains("int")){
             String mensaje = "Error linea: " + ctx.getStart().getLine() + " Valor: " + secondOp + " No es un número entero";
             this.mensajes.add(new MensajeLog(mensaje, true));
+            this.globalStruct = new ArrayList();
              return (T)"error_literal";
         }
-    
+        this.globalStruct = new ArrayList();
         return (T)"int_literal_T";
     }
     
@@ -685,11 +741,6 @@ public class TablesGenerator<T> extends DECAF2BaseVisitor<Object> {
             Symbol firstSymbol = this.findSymbolInScopes(firstOp);
             if (firstSymbol != null)
                 firstOpType = firstSymbol.getType().getTypeName();
-            else{
-                for (int j = 0; j < ctx.getChildCount(); j++) {
-                    visit(ctx.getChild(j));
-                }
-            }
         }
         
         if (!secondOpType.contains("literal_T")) {
@@ -697,29 +748,88 @@ public class TablesGenerator<T> extends DECAF2BaseVisitor<Object> {
             if (secondOp.contains("[")) {
                 find = secondOp.substring(0, secondOp.indexOf("["));
             }
-            Symbol secondSymbol = this.findSymbolInScopes(find);
-            secondOpType = secondSymbol.getType().getTypeName();
+            //Symbol secondSymbol = this.findSymbolInScopes(find);
+            //secondOpType = secondSymbol.getType().getTypeName();
         }
         
         if (!firstOpType.contains("int")) {
             String mensaje = "Error linea: " + ctx.getStart().getLine() + " Valor: " + firstOp + " No es un número entero";
             this.mensajes.add(new MensajeLog(mensaje, true));
+            this.globalStruct = new ArrayList();
             return (T)"error_literal_T";
         }
-        if(!secondOpType.contains("int")){
+        if(!secondOpType.contains("int")) {
             String mensaje = "Error linea: " + ctx.getStart().getLine() + " Valor: " + secondOp + " No es un número entero";
             this.mensajes.add(new MensajeLog(mensaje, true));
+            this.globalStruct = new ArrayList();
             return (T)"error_literal_T";
         }
-    
+        this.globalStruct = new ArrayList();
         return (T)"int_literal_T";
     }
 
     @Override
     public Object visitStructLocation(DECAF2Parser.StructLocationContext ctx) {
-        
-        
-        return super.visitStructLocation(ctx); //To change body of generated methods, choose Tools | Templates.
+        String simpleVar = (String)this.visit(ctx.getChild(0));
+        //System.out.println(ctx.getText());
+        try {
+            if (ctx.getChild(2).getChild(0).getChildCount() != 1) {
+                this.globalStruct.add(ctx.getChild(0).getText());
+                super.visitStructLocation(ctx);
+                return this.globalStruct;
+            }
+            //System.out.println("Solo tiene un hijo: " + ctx.getChild(2).getChild(0).getText());
+            this.globalStruct.add(ctx.getChild(0).getText());
+            this.globalStruct.add(ctx.getChild(2).getChild(0).getText());
+            
+            Structure methodSymbol = null;
+            Symbol found = null;
+            for (int i = 0; i < globalStruct.size(); i++) {
+                //System.out.println("Eval: " + globalStruct.get(i));
+                if (i == 0) {
+                    methodSymbol = tablaEstructura.getStructure(globalStruct.get(i), scopeActual);
+                    if (methodSymbol == null) {
+                        found = findSymbolInScopes(globalStruct.get(i), scopeActual);
+                    }
+                    //System.out.println("No truena después de i = 0 cmp");
+                } else {
+                    //System.out.println("FOUND: " + found.getId());
+                    //System.out.println("FOUND TYPE: " + found.getType().getTypeName());
+                    if (methodSymbol != null) {
+                        methodSymbol = findStructureInScopes(((Type)found.getType()).getTypeName(), scopeActual);
+                        //System.out.println("MT: " + methodSymbol);
+                    } else {
+                        methodSymbol = findStructureInScopes(((Type)found.getType()).getTypeName(), scopeActual);
+                        //System.out.println("ST: " + methodSymbol);
+                    }
+                    //System.out.println("MethodSymol: " + methodSymbol);
+                    if (methodSymbol != null) {
+                        ArrayList<Symbol> members = methodSymbol.getMembers();
+                        //System.out.println("Members: " + members);
+                        for (int k = 0; k < members.size(); k++) {
+                            Symbol innerSymbol =  members.get(k);
+                            if (innerSymbol.getId().equals(globalStruct.get(i))) {
+                                //System.out.println("Encontró: " + globalStruct.get(i));
+                                found = innerSymbol;
+                            }
+                        }
+                    }
+                }
+            }
+            //System.out.println("FOUND FINAL: " + found);
+            //System.out.println("FOUND FINAL TYPE: " + found.getType().getTypeName());
+            this.globalStruct = new ArrayList();
+            globalStruct.add(found.getType().getTypeName());
+            
+        } catch(Exception e) {
+            String mensaje = "Error linea: " + ctx.getStart().getLine() + " No se encontró subestructura";
+            this.mensajes.add(new MensajeLog(mensaje, true));
+        }
+        String returnSTR = globalStruct.get(0);
+        //System.out.println("Ret: " + returnSTR);
+        //globalStruct = new ArrayList();
+        //System.out.println("GS: " + globalStruct.get(0));
+        return returnSTR; //To change body of generated methods, choose Tools | Templates.
     }
     
     @Override public T visitStatement(@NotNull DECAF2Parser.StatementContext ctx) {
@@ -771,10 +881,7 @@ public class TablesGenerator<T> extends DECAF2BaseVisitor<Object> {
     
     @Override
     public T visitLocation(@NotNull DECAF2Parser.LocationContext ctx) {
-        for (int i = 0; i < ctx.getChildCount(); i++) {
-            this.visit(ctx.getChild(i));
-        }
-        return (T)ctx.getChild(0).getText();
+        return (T)visit(ctx.getChild(0));
     }
 
     public Symbol findSymbolInScopes(String id) {
@@ -792,6 +899,24 @@ public class TablesGenerator<T> extends DECAF2BaseVisitor<Object> {
         return null;
     }
     
+    public Structure findStructureInScopes(String id, Scope scope) {
+        Scope actual = scope;
+        if (id.contains("struct:")) {
+            int index = id.indexOf(":") + 1;
+            id = id.substring(index);
+        }
+        while (actual != null) {
+            for (Structure s: this.tablaEstructura.getAllStructureInScope(actual)) {
+                if (s.getId().equals(id)) {
+                    return s;
+                }
+            }
+            actual = actual.getAnterior();
+        }
+        
+        return null;
+    }
+    
     public Symbol findSymbolInScopes(String id, Scope buscarAmbito) {
         for (Symbol s: this.tablaSimbolos.getAllSymbolInScope(buscarAmbito)) {
             if (s.getId().equals(id)) {
@@ -799,6 +924,14 @@ public class TablesGenerator<T> extends DECAF2BaseVisitor<Object> {
             }
         }
         
+        return null;
+    }
+    
+    public Structure findStructureInScope(String id, Scope ambito) {
+        System.out.println("Buscar estructuras");
+        for (Structure s: this.tablaEstructura.getAllStructureInScope(ambito)) {
+            System.out.println(s);
+        }
         return null;
     }
     
@@ -832,5 +965,15 @@ public class TablesGenerator<T> extends DECAF2BaseVisitor<Object> {
                 this.mensajes.add(new MensajeLog(mensaje, true));
             }
         }
+    }
+
+    @Override
+    public Object visitSimpleVariable(DECAF2Parser.SimpleVariableContext ctx) {
+        return ctx.getText(); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Object visitUnaryExpr(DECAF2Parser.UnaryExprContext ctx) {
+        return visit(ctx.getChild(0)); //To change body of generated methods, choose Tools | Templates.
     }
 }

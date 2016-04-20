@@ -504,7 +504,7 @@ public class GUI extends javax.swing.JFrame {
         refreshTables();
         refreshLogText();
         
-        generarCodigoIntermedio(generadorTabla, tree);
+        //generarCodigoIntermedio(generadorTabla, tree);
     }
 
     private void generarCodigoIntermedio(TablesGenerator tablas, DECAF2Parser.ProgramaContext tree) {
