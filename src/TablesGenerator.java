@@ -34,7 +34,7 @@ public class TablesGenerator<T> extends DECAF2BaseVisitor<Object> {
     
     @Override
     public T visitPrograma(@NotNull DECAF2Parser.ProgramaContext ctx) {
-        System.out.println("Program: " + ctx.getText());
+        //System.out.println("Program: " + ctx.getText());
         scopeActual = new Scope();
         return (T)visitChildren(ctx);
     }
@@ -731,38 +731,69 @@ public class TablesGenerator<T> extends DECAF2BaseVisitor<Object> {
     
     // Multiplicación y división
     @Override public T visitMultDivExpr(@NotNull DECAF2Parser.MultDivExprContext ctx) {
-        String firstOpType = (String)this.visit(ctx.getChild(0));
-        String secondOpType = (String)this.visit(ctx.getChild(2));
+        String firstOpType = "";
+        String secondOpType = "";
+        
+        Object fOP = this.visit(ctx.getChild(0));
+        Object sOP = this.visit(ctx.getChild(2));
+        
+        if (fOP instanceof ArrayList) {
+            firstOpType = (String)((ArrayList)fOP).get(0);
+        } else {
+            firstOpType = (String)fOP;
+        }
+        
+        if (sOP instanceof ArrayList) {
+            secondOpType = (String)((ArrayList)sOP).get(0);
+        } else {
+            secondOpType = (String)sOP;
+        }
         
         String firstOp = (String)(ctx.getChild(0).getChild(0).getText());
         String secondOp = (String)(ctx.getChild(2).getChild(0).getText());
         
-        if (!firstOpType.contains("literal_T")){
-            Symbol firstSymbol = this.findSymbolInScopes(firstOp);
-            if (firstSymbol != null)
+        if (!firstOpType.contains("literal_T") && !firstOpType.contains(".") && !firstOpType.equals("char") && !firstOpType.equals("int") && !firstOpType.equals("bool")) {
+            String find = firstOp;
+            if (firstOp.contains("[")) {
+                find = firstOp.substring(0, firstOp.indexOf("["));
+            }
+            Symbol firstSymbol = this.findSymbolInScopes(find);
+            if (firstSymbol != null) {
                 firstOpType = firstSymbol.getType().getTypeName();
+            } else {
+                String mensaje = "Error linea: " + ctx.getStart().getLine() + " No existe variable";
+                this.mensajes.add(new MensajeLog(mensaje, true));
+                return (T)"error_literal";
+            }
+            
         }
         
-        if (!secondOpType.contains("literal_T")) {
+        if (!secondOpType.contains("literal_T") && !secondOpType.contains(".") && !secondOpType.equals("char") && !secondOpType.equals("int") && !secondOpType.equals("bool")) {
             String find = secondOp;
             if (secondOp.contains("[")) {
                 find = secondOp.substring(0, secondOp.indexOf("["));
             }
-            //Symbol secondSymbol = this.findSymbolInScopes(find);
-            //secondOpType = secondSymbol.getType().getTypeName();
+            Symbol secondSymbol = this.findSymbolInScopes(find);
+            if (secondSymbol != null) {
+                secondOpType = secondSymbol.getType().getTypeName();
+            } else {
+                String mensaje = "Error linea: " + ctx.getStart().getLine() + " No existe variable";
+                this.mensajes.add(new MensajeLog(mensaje, true));
+                return (T)"error_literal";
+            }
         }
         
         if (!firstOpType.contains("int")) {
             String mensaje = "Error linea: " + ctx.getStart().getLine() + " Valor: " + firstOp + " No es un número entero";
             this.mensajes.add(new MensajeLog(mensaje, true));
             this.globalStruct = new ArrayList();
-            return (T)"error_literal_T";
+            return (T)"error_literal";
         }
-        if(!secondOpType.contains("int")) {
+        if(!secondOpType.contains("int")){
             String mensaje = "Error linea: " + ctx.getStart().getLine() + " Valor: " + secondOp + " No es un número entero";
             this.mensajes.add(new MensajeLog(mensaje, true));
             this.globalStruct = new ArrayList();
-            return (T)"error_literal_T";
+             return (T)"error_literal";
         }
         this.globalStruct = new ArrayList();
         return (T)"int_literal_T";
@@ -928,7 +959,7 @@ public class TablesGenerator<T> extends DECAF2BaseVisitor<Object> {
     }
     
     public Structure findStructureInScope(String id, Scope ambito) {
-        System.out.println("Buscar estructuras");
+        //System.out.println("Buscar estructuras");
         for (Structure s: this.tablaEstructura.getAllStructureInScope(ambito)) {
             System.out.println(s);
         }
