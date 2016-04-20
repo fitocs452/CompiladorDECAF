@@ -13,6 +13,8 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
     private int contTempVars = 0;
     private ArrayList<String> booleanDataTypes;
     private ArrayList<GlobalStackPointer> stackGlobal; 
+    private boolean structDeclaration = false;
+    private ArrayList<String> globalStruct;
     
     private final int BOOL_OFFSET = 4;
     private final int INT_OFFSET = 4;
@@ -25,6 +27,7 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
         stack = new ArrayList();
         stackGlobal = new ArrayList();
         scopeActual = new Scope();
+        globalStruct = new ArrayList();
         
         booleanDataTypes = new ArrayList();
         booleanDataTypes.add("true");
@@ -46,13 +49,9 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
         String id = ctx.getChild(1).getText();
         int lenght = Integer.parseInt(ctx.getChild(3).getText());
         
-        if (scopeActual.getName() == 0) {
+        if (scopeActual.getName() == 0 || structDeclaration) {
             this.stackGlobal.add(new GlobalStackPointer(INT_OFFSET * lenght, id, tipo));
-            /*IntermediateCode codigo = new IntermediateCode();
             
-            codigo.setLabel(ctx.getChild(1).getText() + "_global");
-            codigo.setIsGlobal(true);
-            tablaCodigo.addCodigo(codigo);*/
             return super.visitArrayVarDeclaration(ctx);
         }
      
@@ -79,11 +78,11 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
         String tipo = ctx.getChild(0).getText();
         String id = ctx.getChild(1).getText();
         
-        if (scopeActual.getName() == 0) {
+        if (scopeActual.getName() == 0 || structDeclaration) {
+            if (structDeclaration) {
+                id += "_" + ctx.getParent().getChild(1).getText();
+            }
             this.stackGlobal.add(new GlobalStackPointer(INT_OFFSET, id, tipo));
-            /*codigo.setLabel(ctx.getChild(1).getText() + "_global");
-            codigo.setIsGlobal(true);
-            tablaCodigo.addCodigo(codigo);*/
             
             return super.visitSimpleVarDeclaration(ctx);
         }
@@ -358,10 +357,15 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
         scopeActual.addScopeChild(nuevoScope);
         nuevoScope.setAnterior(scopeActual);
         
+        if (scopeActual.getName() == 0) {
+            structDeclaration = true;
+        }
+        
         scopeActual = nuevoScope;
         
         super.visitStructDeclaration(ctx);
         
+        structDeclaration = false;
         scopeActual = scopeActual.getAnterior();
         StackPointer.globalPos = 0;
         return null; //To change body of generated methods, choose Tools | Templates.
@@ -395,11 +399,9 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
                 operators.push(arrayVar);
             }
         }
-        
         if (countOperators > 1) {
             firstOpTmp = operators.pop();
             firstOp = firstOpTmp;
-            System.out.println(firstOp);
         }
         if (firstOpTmp.isEmpty()) {
             Object eval = this.visit(ctx.getChild(0));
@@ -449,17 +451,20 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
         
         ic.setRes("temp" + this.contTempVars++);
         this.tablaCodigo.addCodigo(ic);
+        System.out.println("------------*********************----------------");
         
         return ic;
     }
 
     @Override
     public Object visitUnaryExpr(DECAF2Parser.UnaryExprContext ctx) {
-         return visit(ctx.getChild(0)); //To change body of generated methods, choose Tools | Templates.
+        //System.out.println("CTX: " + ctx.getText());
+        return visit(ctx.getChild(0)); //To change body of generated methods, choose Tools | Templates.
     }
     
     @Override
     public Object visitMultDivExpr(DECAF2Parser.MultDivExprContext ctx) {
+        System.out.println("MULTjlskjdflas");
         String firstOpTmp = "";
         String secondOpTmp = "";
         
@@ -491,6 +496,7 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
             firstOp= firstOpTmp;
         }
         if (firstOpTmp.isEmpty()) {
+            System.out.println("Visitar primero");
             Object eval = this.visit(ctx.getChild(0));
             if (eval instanceof IntermediateCode) {
                 firstOp = ((IntermediateCode)eval).getRes();
@@ -647,7 +653,17 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
     @Override
     public Object visitValue(DECAF2Parser.ValueContext ctx) {
         IntermediateCode codigo = new IntermediateCode();
-        codigo.setRes(ctx.getChild(0).getChild(0).getText());
+        if (ctx.getChild(0).getChild(0).getChildCount() == 1) {
+            System.out.println("return luego de visit: " + this.visit(ctx.getChild(0)));
+            codigo.setRes(ctx.getChild(0).getChild(0).getText());
+            System.out.println("1: " + codigo.getRes());
+        } else {
+            // Aquí hay que sustituir o jalar el valor que tiene el atributo de estructura
+            //System.out.println("return luego de visit: " + this.visitLocation((DECAF2Parser.LocationContext)ctx.getChild(0)));
+            //codigo.setRes(ctx.getChild(0).getChild(0).getText());
+            codigo.setRes((String)this.visitLocation((DECAF2Parser.LocationContext)ctx.getChild(0)));
+            System.out.println("2: " + codigo.getRes());
+        }
         
         return codigo; //To change body of generated methods, choose Tools | Templates.
     }
@@ -664,6 +680,55 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
         return returnArray;
     }
 
+    @Override
+    public Object visitStructLocation(DECAF2Parser.StructLocationContext ctx) {
+        Scope scopeLocal = scopeActual;
+        if (ctx.getChild(2).getChild(0).getChildCount() > 1) {
+            this.globalStruct.add(ctx.getChild(0).getText());
+            return super.visitStructLocation(ctx);
+            //return this.globalStruct;
+        }
+        this.globalStruct.add(ctx.getChild(0).getText());
+        this.globalStruct.add(ctx.getChild(2).getChild(0).getText());
+        
+        Structure methodSymbol = null;
+        Symbol found = null;
+        for (int i = 0; i < globalStruct.size(); i++) {
+            if (i == 0) {
+                methodSymbol = this.tablas.getTablaEstructura().getStructure(globalStruct.get(i), scopeLocal);
+                if (methodSymbol == null) {
+                    found = this.tablas.findSymbolInScopes(globalStruct.get(i), scopeLocal);
+                }
+                //System.out.println("No truena después de i = 0 cmp");
+            } else {
+                if (methodSymbol != null) {
+                    methodSymbol = tablas.findStructureInScopes(((Type)found.getType()).getTypeName(), scopeLocal);
+                    //System.out.println("MT: " + methodSymbol);
+                } else {
+                    methodSymbol = tablas.findStructureInScopes(((Type)found.getType()).getTypeName(), scopeLocal);
+                    //System.out.println("ST: " + methodSymbol);
+                }
+                if (methodSymbol != null) {
+                    ArrayList<Symbol> members = methodSymbol.getMembers();
+                    //System.out.println("Members: " + members);
+                    for (int k = 0; k < members.size(); k++) {
+                        Symbol innerSymbol =  members.get(k);
+                        if (innerSymbol.getId().equals(globalStruct.get(i))) {
+                            //System.out.println("Encontró: " + globalStruct.get(i));
+                            found = innerSymbol;
+                            scopeLocal = found.getScope();
+                        }
+                    }
+                }
+            }
+        }
+        
+        this.globalStruct = new ArrayList();
+        String returnSTR = found.getId() + "_" + methodSymbol.getId();
+        
+        return "stack_global[" +this.findPosInGlobalStackById(returnSTR) + "]";
+    }
+    
     public String processArrayVariable(String arrayVar) {
         String nombreVar = arrayVar.substring(0, arrayVar.indexOf("["));
         int indexVar = Integer.parseInt(arrayVar.substring(arrayVar.indexOf("[") + 1, arrayVar.indexOf("]")));
@@ -708,5 +773,21 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
             }
         }
         return returnSTR;
+    }
+
+    @Override
+    public Object visitLocation(DECAF2Parser.LocationContext ctx) {
+        System.out.println("vl: " + ctx.getText());
+        Object ret = this.visit(ctx.getChild(0));
+        System.out.println(ret);
+        /*if (ret instanceof String) {
+            System.out.println("RT: " + ret);
+            return (String)ret;
+        } else {
+            System.out.println("RT2: " + ret);
+            return ret;
+        }*/
+        return ret;
+        //return this.visit(ctx.getChild(0)); //To change body of generated methods, choose Tools | Templates.
     }
 }

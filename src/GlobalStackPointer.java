@@ -41,4 +41,10 @@ public class GlobalStackPointer {
     public void setTipo(String tipo) {
         this.tipo = tipo;
     }
+
+    @Override
+    public String toString() {
+        return "GSP{" + "pos=" + pos + ", id=" + id + ", tipo=" + tipo + '}';
+    }
+    
 }

@@ -384,6 +384,7 @@ public class TablesGenerator<T> extends DECAF2BaseVisitor<Object> {
             return (T)"Error";
         }
          
+        System.out.println("visit: " + ctx.getChild(2).getText());
         String tipoExpresionAsignar = (String)this.visit(ctx.getChild(2));
         
         String nombreTipoSimbolo = simbolo.getType().getTypeName();
@@ -391,6 +392,8 @@ public class TablesGenerator<T> extends DECAF2BaseVisitor<Object> {
             nombreTipoSimbolo = nombreTipoSimbolo.substring(0, nombreTipoSimbolo.indexOf("["));
         }
         
+        System.out.println("CONTEXT: " + ctx.getText());
+        System.out.println("LET: " + tipoExpresionAsignar);
         if (tipoExpresionAsignar.contains("literal_T")) {
             //System.out.println("Sí es un literal " + tipoExpresionAsignar);
             if (tipoExpresionAsignar.contains(nombreTipoSimbolo)) {
@@ -601,28 +604,37 @@ public class TablesGenerator<T> extends DECAF2BaseVisitor<Object> {
         Symbol variable = this.findSymbolInScopes(nombreVar);
         
         if (variable == null) {
+            System.out.println("No existe variable: " + nombreVar);
             String mensaje = "Error linea: " + ctx.getStart().getLine() + " Variable: " + nombreVar + " No existe";
             this.mensajes.add(new MensajeLog(mensaje, true));
+            return (T)visitChildren(ctx);
         }
         
         if (variable != null) {
             if (!variable.getType().isArray()) {
                 String mensaje = "Error linea: " + ctx.getStart().getLine() + " Variable: " + nombreVar + " No es de tipo array";
                 this.mensajes.add(new MensajeLog(mensaje, true));
+                return (T)visitChildren(ctx);
             } else {
                 int indiceLlamado = Integer.parseInt((String)literalStack.pop());
                 if (indiceLlamado < 0) {
                     String mensaje = "Error linea: " + ctx.getStart().getLine() + " Parametro: " + indiceLlamado + " Debe ser mayor que cero";
                     this.mensajes.add(new MensajeLog(mensaje, true));
+                    return (T)visitChildren(ctx);
                 }
 
                 if (indiceLlamado > (variable.getType().getArrayLenght() - 1)) {
                     String mensaje = "Error linea: " + ctx.getStart().getLine() + " Parametro: " + indiceLlamado + " Está fuera de rango";
                     this.mensajes.add(new MensajeLog(mensaje, true));
+                    return (T)visitChildren(ctx);
                 }
             }
+            
         }
-        return (T)visitChildren(ctx);
+        int i = variable.getType().getTypeName().indexOf("[");
+        String tipo = variable.getType().getTypeName().substring(0, i);
+        
+        return (T)tipo;
     }
     
     // Condiciones anidadas con AND

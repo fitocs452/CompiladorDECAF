@@ -4,14 +4,7 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/home/adolfo/Universidad/Compiladores/CompiladorDECAF/src/TablesGenerator.java</file>
-            <file>file:/home/adolfo/Universidad/Compiladores/CompiladorDECAF/src/StackPointer.java</file>
-            <file>file:/home/adolfo/Universidad/Compiladores/CompiladorDECAF/src/Symbol.java</file>
-            <file>file:/home/adolfo/Universidad/Compiladores/CompiladorDECAF/src/GUI.java</file>
-            <file>file:/home/adolfo/Universidad/Compiladores/CompiladorDECAF/src/DECAF2/DECAF2.g4</file>
-            <file>file:/home/adolfo/Universidad/Compiladores/CompiladorDECAF/src/IntermediateCodeTable.java</file>
-            <file>file:/home/adolfo/Universidad/Compiladores/CompiladorDECAF/src/DECAF2/DECAF2BaseVisitor.java</file>
             <file>file:/home/adolfo/Universidad/Compiladores/CompiladorDECAF/src/IntermediateCodeGenerator.java</file>
-            <file>file:/home/adolfo/Universidad/Compiladores/CompiladorDECAF/src/IntermediateCode.java</file>
         </group>
     </open-files>
 </project-private>
