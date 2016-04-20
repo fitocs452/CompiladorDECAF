@@ -451,7 +451,7 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
         
         ic.setRes("temp" + this.contTempVars++);
         this.tablaCodigo.addCodigo(ic);
-        System.out.println("------------*********************----------------");
+        //System.out.println("------------*********************----------------");
         
         return ic;
     }
@@ -496,7 +496,7 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
             firstOp= firstOpTmp;
         }
         if (firstOpTmp.isEmpty()) {
-            System.out.println("Visitar primero");
+            //System.out.println("Visitar primero");
             Object eval = this.visit(ctx.getChild(0));
             if (eval instanceof IntermediateCode) {
                 firstOp = ((IntermediateCode)eval).getRes();
@@ -654,15 +654,15 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
     public Object visitValue(DECAF2Parser.ValueContext ctx) {
         IntermediateCode codigo = new IntermediateCode();
         if (ctx.getChild(0).getChild(0).getChildCount() == 1) {
-            System.out.println("return luego de visit: " + this.visit(ctx.getChild(0)));
+            //System.out.println("return luego de visit: " + this.visit(ctx.getChild(0)));
             codigo.setRes(ctx.getChild(0).getChild(0).getText());
-            System.out.println("1: " + codigo.getRes());
+            //System.out.println("1: " + codigo.getRes());
         } else {
             // Aquí hay que sustituir o jalar el valor que tiene el atributo de estructura
             //System.out.println("return luego de visit: " + this.visitLocation((DECAF2Parser.LocationContext)ctx.getChild(0)));
             //codigo.setRes(ctx.getChild(0).getChild(0).getText());
             codigo.setRes((String)this.visitLocation((DECAF2Parser.LocationContext)ctx.getChild(0)));
-            System.out.println("2: " + codigo.getRes());
+            //System.out.println("2: " + codigo.getRes());
         }
         
         return codigo; //To change body of generated methods, choose Tools | Templates.
@@ -777,9 +777,9 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
 
     @Override
     public Object visitLocation(DECAF2Parser.LocationContext ctx) {
-        System.out.println("vl: " + ctx.getText());
+        //System.out.println("vl: " + ctx.getText());
         Object ret = this.visit(ctx.getChild(0));
-        System.out.println(ret);
+        //System.out.println(ret);
         /*if (ret instanceof String) {
             System.out.println("RT: " + ret);
             return (String)ret;

@@ -384,7 +384,7 @@ public class TablesGenerator<T> extends DECAF2BaseVisitor<Object> {
             return (T)"Error";
         }
          
-        System.out.println("visit: " + ctx.getChild(2).getText());
+        //System.out.println("visit: " + ctx.getChild(2).getText());
         String tipoExpresionAsignar = (String)this.visit(ctx.getChild(2));
         
         String nombreTipoSimbolo = simbolo.getType().getTypeName();
@@ -392,8 +392,8 @@ public class TablesGenerator<T> extends DECAF2BaseVisitor<Object> {
             nombreTipoSimbolo = nombreTipoSimbolo.substring(0, nombreTipoSimbolo.indexOf("["));
         }
         
-        System.out.println("CONTEXT: " + ctx.getText());
-        System.out.println("LET: " + tipoExpresionAsignar);
+        //System.out.println("CONTEXT: " + ctx.getText());
+        //System.out.println("LET: " + tipoExpresionAsignar);
         if (tipoExpresionAsignar.contains("literal_T")) {
             //System.out.println("Sí es un literal " + tipoExpresionAsignar);
             if (tipoExpresionAsignar.contains(nombreTipoSimbolo)) {
@@ -604,7 +604,7 @@ public class TablesGenerator<T> extends DECAF2BaseVisitor<Object> {
         Symbol variable = this.findSymbolInScopes(nombreVar);
         
         if (variable == null) {
-            System.out.println("No existe variable: " + nombreVar);
+            //System.out.println("No existe variable: " + nombreVar);
             String mensaje = "Error linea: " + ctx.getStart().getLine() + " Variable: " + nombreVar + " No existe";
             this.mensajes.add(new MensajeLog(mensaje, true));
             return (T)visitChildren(ctx);
@@ -710,6 +710,7 @@ public class TablesGenerator<T> extends DECAF2BaseVisitor<Object> {
             
         }
         
+        //System.out.println("SOP_ " + secondOpType);
         if (!secondOpType.contains("literal_T") && !secondOpType.contains(".") && !secondOpType.equals("char") && !secondOpType.equals("int") && !secondOpType.equals("bool")) {
             String find = secondOp;
             if (secondOp.contains("[")) {
