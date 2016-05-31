@@ -149,18 +149,6 @@ public class DECAF2BaseListener implements DECAF2Listener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSimpleAddExpr(@NotNull DECAF2Parser.SimpleAddExprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitSimpleAddExpr(@NotNull DECAF2Parser.SimpleAddExprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterLiteral(@NotNull DECAF2Parser.LiteralContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -353,6 +341,18 @@ public class DECAF2BaseListener implements DECAF2Listener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterRelationExpr(@NotNull DECAF2Parser.RelationExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitRelationExpr(@NotNull DECAF2Parser.RelationExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterChar_literal(@NotNull DECAF2Parser.Char_literalContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -432,18 +432,6 @@ public class DECAF2BaseListener implements DECAF2Listener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitSimpleVariable(@NotNull DECAF2Parser.SimpleVariableContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterConditionalExpr(@NotNull DECAF2Parser.ConditionalExprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitConditionalExpr(@NotNull DECAF2Parser.ConditionalExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

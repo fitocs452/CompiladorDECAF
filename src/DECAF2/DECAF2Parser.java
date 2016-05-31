@@ -1838,17 +1838,6 @@ public class DECAF2Parser extends Parser {
 	}
 
 	public static class RelationExprContext extends ParserRuleContext {
-		public RelationExprContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_relationExpr; }
-	 
-		public RelationExprContext() { }
-		public void copyFrom(RelationExprContext ctx) {
-			super.copyFrom(ctx);
-		}
-	}
-	public static class ConditionalExprContext extends RelationExprContext {
 		public AddExprContext addExpr() {
 			return getRuleContext(AddExprContext.class,0);
 		}
@@ -1858,37 +1847,21 @@ public class DECAF2Parser extends Parser {
 		public RelationExprContext relationExpr() {
 			return getRuleContext(RelationExprContext.class,0);
 		}
-		public ConditionalExprContext(RelationExprContext ctx) { copyFrom(ctx); }
+		public RelationExprContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_relationExpr; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof DECAF2Listener ) ((DECAF2Listener)listener).enterConditionalExpr(this);
+			if ( listener instanceof DECAF2Listener ) ((DECAF2Listener)listener).enterRelationExpr(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof DECAF2Listener ) ((DECAF2Listener)listener).exitConditionalExpr(this);
+			if ( listener instanceof DECAF2Listener ) ((DECAF2Listener)listener).exitRelationExpr(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof DECAF2Visitor ) return ((DECAF2Visitor<? extends T>)visitor).visitConditionalExpr(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-	public static class SimpleAddExprContext extends RelationExprContext {
-		public AddExprContext addExpr() {
-			return getRuleContext(AddExprContext.class,0);
-		}
-		public SimpleAddExprContext(RelationExprContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof DECAF2Listener ) ((DECAF2Listener)listener).enterSimpleAddExpr(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof DECAF2Listener ) ((DECAF2Listener)listener).exitSimpleAddExpr(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof DECAF2Visitor ) return ((DECAF2Visitor<? extends T>)visitor).visitSimpleAddExpr(this);
+			if ( visitor instanceof DECAF2Visitor ) return ((DECAF2Visitor<? extends T>)visitor).visitRelationExpr(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -1909,10 +1882,6 @@ public class DECAF2Parser extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 			{
-			_localctx = new SimpleAddExprContext(_localctx);
-			_ctx = _localctx;
-			_prevctx = _localctx;
-
 			setState(280); addExpr(0);
 			}
 			_ctx.stop = _input.LT(-1);
@@ -1925,7 +1894,7 @@ public class DECAF2Parser extends Parser {
 					_prevctx = _localctx;
 					{
 					{
-					_localctx = new ConditionalExprContext(new RelationExprContext(_parentctx, _parentState));
+					_localctx = new RelationExprContext(_parentctx, _parentState);
 					pushNewRecursionContext(_localctx, _startState, RULE_relationExpr);
 					setState(282);
 					if (!(precpred(_ctx, 1))) throw new FailedPredicateException(this, "precpred(_ctx, 1)");

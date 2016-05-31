@@ -82,13 +82,6 @@ public interface DECAF2Visitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitRel_op(@NotNull DECAF2Parser.Rel_opContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code SimpleAddExpr}
-	 * labeled alternative in {@link DECAF2Parser#relationExpr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSimpleAddExpr(@NotNull DECAF2Parser.SimpleAddExprContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link DECAF2Parser#literal}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -185,6 +178,12 @@ public interface DECAF2Visitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitStructLocation(@NotNull DECAF2Parser.StructLocationContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link DECAF2Parser#relationExpr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitRelationExpr(@NotNull DECAF2Parser.RelationExprContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link DECAF2Parser#char_literal}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -228,13 +227,6 @@ public interface DECAF2Visitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitSimpleVariable(@NotNull DECAF2Parser.SimpleVariableContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code ConditionalExpr}
-	 * labeled alternative in {@link DECAF2Parser#relationExpr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitConditionalExpr(@NotNull DECAF2Parser.ConditionalExprContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link DECAF2Parser#declaration}.
 	 * @param ctx the parse tree

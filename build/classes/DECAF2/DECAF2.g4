@@ -105,8 +105,8 @@ eqExpr: relationExpr                    #SimpleRelationExpr
         | eqExpr eq_op relationExpr     #EqIneqExpr
         ; 
 
-relationExpr: addExpr                   #SimpleAddExpr
-        | relationExpr rel_op addExpr   #ConditionalExpr
+relationExpr: addExpr                   
+        | relationExpr rel_op addExpr   
         ;
 
 addExpr: multExpr                       #SimpleMultExpr

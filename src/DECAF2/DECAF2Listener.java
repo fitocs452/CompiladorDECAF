@@ -127,18 +127,6 @@ public interface DECAF2Listener extends ParseTreeListener {
 	 */
 	void exitRel_op(@NotNull DECAF2Parser.Rel_opContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code SimpleAddExpr}
-	 * labeled alternative in {@link DECAF2Parser#relationExpr}.
-	 * @param ctx the parse tree
-	 */
-	void enterSimpleAddExpr(@NotNull DECAF2Parser.SimpleAddExprContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code SimpleAddExpr}
-	 * labeled alternative in {@link DECAF2Parser#relationExpr}.
-	 * @param ctx the parse tree
-	 */
-	void exitSimpleAddExpr(@NotNull DECAF2Parser.SimpleAddExprContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link DECAF2Parser#literal}.
 	 * @param ctx the parse tree
 	 */
@@ -299,6 +287,16 @@ public interface DECAF2Listener extends ParseTreeListener {
 	 */
 	void exitStructLocation(@NotNull DECAF2Parser.StructLocationContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link DECAF2Parser#relationExpr}.
+	 * @param ctx the parse tree
+	 */
+	void enterRelationExpr(@NotNull DECAF2Parser.RelationExprContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link DECAF2Parser#relationExpr}.
+	 * @param ctx the parse tree
+	 */
+	void exitRelationExpr(@NotNull DECAF2Parser.RelationExprContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link DECAF2Parser#char_literal}.
 	 * @param ctx the parse tree
 	 */
@@ -372,18 +370,6 @@ public interface DECAF2Listener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitSimpleVariable(@NotNull DECAF2Parser.SimpleVariableContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code ConditionalExpr}
-	 * labeled alternative in {@link DECAF2Parser#relationExpr}.
-	 * @param ctx the parse tree
-	 */
-	void enterConditionalExpr(@NotNull DECAF2Parser.ConditionalExprContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code ConditionalExpr}
-	 * labeled alternative in {@link DECAF2Parser#relationExpr}.
-	 * @param ctx the parse tree
-	 */
-	void exitConditionalExpr(@NotNull DECAF2Parser.ConditionalExprContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link DECAF2Parser#declaration}.
 	 * @param ctx the parse tree

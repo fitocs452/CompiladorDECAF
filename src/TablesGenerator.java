@@ -659,16 +659,28 @@ public class TablesGenerator<T> extends DECAF2BaseVisitor<Object> {
         return (T)this.visit(ctx.getChild(0));
     }
     
-    @Override
+    /*
     public T visitSimpleAddExpr(@NotNull DECAF2Parser.SimpleAddExprContext ctx) {
-        return (T)this.visit(ctx.getChild(0));
+        
     }
     
     // Mayor, menor, mayor o igual, menor o igual
-    @Override
+   
     public T visitConditionalExpr(@NotNull DECAF2Parser.ConditionalExprContext ctx) {
         return (T)"boolean";
+    }*/
+
+    @Override
+    public Object visitRelationExpr(DECAF2Parser.RelationExprContext ctx) {
+        if (ctx.getChildCount() == 1) {
+            return (T)this.visit(ctx.getChild(0));
+        } else {
+            return (T)"boolean";
+        }
+        //return super.visitRelationExpr(ctx); //To change body of generated methods, choose Tools | Templates.
     }
+    
+    
     
     // Suma y resta
     @Override
@@ -971,6 +983,21 @@ public class TablesGenerator<T> extends DECAF2BaseVisitor<Object> {
         return null;
     }
     
+    public Symbol findSymbolInAllScopes(String id, Scope ambito) {
+        Scope actual = ambito;
+        
+        while (actual != null) {
+            for (Symbol s: this.tablaSimbolos.getAllSymbolInScope(actual)) {
+                if (s.getId().equals(id)) {
+                    return s;
+                }
+            }
+            actual = actual.getAnterior();
+        }
+        
+        return null;
+    }
+    
     public Structure findStructureInScope(String id, Scope ambito) {
         //System.out.println("Buscar estructuras");
         for (Structure s: this.tablaEstructura.getAllStructureInScope(ambito)) {
@@ -1018,6 +1045,10 @@ public class TablesGenerator<T> extends DECAF2BaseVisitor<Object> {
 
     @Override
     public Object visitUnaryExpr(DECAF2Parser.UnaryExprContext ctx) {
-        return visit(ctx.getChild(0)); //To change body of generated methods, choose Tools | Templates.
+        if (ctx.getChildCount() == 1) {
+            return visit(ctx.getChild(0)); //To change body of generated methods, choose Tools | Templates.
+        } else {
+            return visit(ctx.getChild(1)); //To change body of generated methods, choose Tools | Templates.
+        }
     }
 }

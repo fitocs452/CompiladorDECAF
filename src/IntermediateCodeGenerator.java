@@ -15,6 +15,9 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
     private ArrayList<GlobalStackPointer> stackGlobal; 
     private boolean structDeclaration = false;
     private ArrayList<String> globalStruct;
+    private int contadorTemps = 0;
+    private int contadorIF = 0;
+    private int contadorElse = 0;
     
     private final int BOOL_OFFSET = 4;
     private final int INT_OFFSET = 4;
@@ -135,7 +138,9 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
             Se uitlizarán variables que representan las direcciones (dir1, dir2)
             */
             String dir1;
+            //System.out.println("e: " + ctx.getChild(2).getText());
             T eval = (T)visit(ctx.getChild(2));
+            //System.out.println("e: " + eval);
 
             if (eval instanceof IntermediateCode ) {
                 dir1 = ((IntermediateCode)eval).getRes();
@@ -316,15 +321,44 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
 
     @Override
     public Object visitIfS(DECAF2Parser.IfSContext ctx) {
-        Scope nuevoScope = new Scope();
-        scopeActual.addScopeChild(nuevoScope);
-        nuevoScope.setAnterior(scopeActual);
+        Scope scopeMethod = new Scope();
         
-        scopeActual = nuevoScope;
+        scopeActual.addScopeChild(scopeMethod);
+        scopeMethod.setAnterior(scopeActual);
+        scopeActual = scopeMethod;
+        //2-0-1
+        IntermediateCode codigo = new IntermediateCode();
+        String etiqueta = ctx.getChild(0).getText() + "_" + this.contadorIF;
         
+        Object expr = this.visit(ctx.getChild(2));
+        String type = ctx.getChild(2).getChild(0).getChild(1).getText();
+        String verify = "";
+        //System.out.println("TYPE: " + type);
+        if (expr instanceof ArrayList) {
+            for (int i = 0; i < ((ArrayList)expr).size(); i++) {
+                IntermediateCode ic = (IntermediateCode)((ArrayList)expr).get(i);
+                if (ic != null) {
+                    if (i == ((ArrayList)expr).size() - 1) {
+                        verify += ic.getFirstDir() + " " + ic.getOperator() + " " + ic.getSecondDir();
+                        continue;
+                    }
+                    verify += ic.getFirstDir() + " " + ic.getOperator() + " " + ic.getSecondDir() + " " + type + " ";
+                }
+            }
+        }
+        codigo.setLabel(etiqueta + ": TRUE - EVAL: (" + verify + ")");
+        
+        tablaCodigo.addCodigo(codigo);
         super.visitIfS(ctx);
         
-        scopeActual = nuevoScope.getAnterior();
+        System.out.println("VER: " + verify);
+        IntermediateCode codigo2 = new IntermediateCode();
+
+        codigo2.setLabel(etiqueta + ": FALSE");
+        tablaCodigo.addCodigo(codigo2);
+        
+        scopeActual = scopeActual.getAnterior();
+        StackPointer.globalPos = 0;
         
         return  null;//To change body of generated methods, choose Tools | Templates.
     }
@@ -458,13 +492,17 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
 
     @Override
     public Object visitUnaryExpr(DECAF2Parser.UnaryExprContext ctx) {
+        if (ctx.getChildCount() == 1) {
+            return visit(ctx.getChild(0));
+        } else {
         //System.out.println("CTX: " + ctx.getText());
-        return visit(ctx.getChild(0)); //To change body of generated methods, choose Tools | Templates.
+            return visit(ctx.getChild(1)); //To change body of generated methods, choose Tools | Templates.
+        }
     }
     
     @Override
     public Object visitMultDivExpr(DECAF2Parser.MultDivExprContext ctx) {
-        System.out.println("MULTjlskjdflas");
+        //System.out.println("MULTjlskjdflas");
         String firstOpTmp = "";
         String secondOpTmp = "";
         
@@ -779,15 +817,213 @@ public class IntermediateCodeGenerator<T> extends DECAF2BaseVisitor<Object> {
     public Object visitLocation(DECAF2Parser.LocationContext ctx) {
         //System.out.println("vl: " + ctx.getText());
         Object ret = this.visit(ctx.getChild(0));
-        //System.out.println(ret);
-        /*if (ret instanceof String) {
-            System.out.println("RT: " + ret);
-            return (String)ret;
-        } else {
-            System.out.println("RT2: " + ret);
-            return ret;
-        }*/
         return ret;
         //return this.visit(ctx.getChild(0)); //To change body of generated methods, choose Tools | Templates.
     }
+
+    @Override
+    public Object visitMethodCall(DECAF2Parser.MethodCallContext ctx) {
+        for (int i = 1; i < ctx.getChildCount(); i++) {
+            T param = (T)this.visit(ctx.getChild(i));
+            //System.out.println(param);
+            
+            if (param instanceof IntermediateCode) {
+                IntermediateCode parametro = new IntermediateCode();
+                parametro.setFirstDir("PARAM");
+                parametro.setSecondDir(((IntermediateCode)param).getRes());
+                this.tablaCodigo.addCodigo(parametro);
+            }
+            
+            if (param instanceof ArrayList){
+                IntermediateCode parametro = new IntermediateCode();
+                parametro.setFirstDir("PARAM");
+                if (((ArrayList)param).get(0) instanceof String) {
+                    String nombreVAr = (String)((ArrayList)param).get(0);
+                    Symbol amb = tablaCodigo.findSymbolInGlobalScope(nombreVAr, scopeActual);
+                    if (amb != null) {
+                        parametro.setSecondDir("stack_global[" + this.findPosInGlobalStackById(nombreVAr) + "]");
+                    } else {
+                        parametro.setSecondDir("stack[" + this.findPosInStackById(nombreVAr) + "]");
+                    }  
+                } else {
+                    parametro.setSecondDir(((IntermediateCode)((ArrayList)param).get(0)).getRes());
+                }
+                this.tablaCodigo.addCodigo(parametro);
+            }
+        }
+        IntermediateCode ic  = new IntermediateCode("CALL", ctx.getChild(0).getText(), "");
+        ic.setRes("temp0");
+        this.tablaCodigo.addCodigo(ic);
+        return  ic;
+        //return super.visitMethodCall(ctx); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Object visitExp1(DECAF2Parser.Exp1Context ctx) {
+        //System.out.println("lol: " + this.visit(ctx.getChild(0)));
+        /*System.out.println("ExpressionVisit");
+        IntermediateCode codigo = new IntermediateCode();
+        String etiqueta = "";
+
+        if (ctx.getChildCount() == 1) {
+            System.out.println("Un hijo: " + this.visit(ctx.getChild(0)));
+        }
+        
+        if (ctx.getChildCount() == 3) {
+            System.out.println("primer hijo: " + this.visit(ctx.getChild(0)));
+            System.out.println(" hijo: " + this.visit(ctx.getChild(2)));
+        }*/
+        return super.visitExp1(ctx); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Object visitRelationExpr(DECAF2Parser.RelationExprContext ctx) {
+        if (ctx.getChildCount() > 1) {
+            T val1 = (T)visit(ctx.getChild(0));
+            T val2 = (T)visit(ctx.getChild(2));
+            String dir1;
+            String dir2;
+            if (val1 instanceof IntermediateCode){
+                dir1 = ((IntermediateCode)(val1)).getRes();
+            }else
+                dir1 = (String)val1;
+
+            if (val2 instanceof IntermediateCode){
+                dir2 =  ((IntermediateCode)(val2)).getRes();
+            }else
+                dir2 = (String)val2;
+
+            try {
+               int test = Integer.parseInt(dir1);
+            } catch(Exception e){
+                if (!dir1.contains("[")){
+                    Symbol amb = tablaCodigo.findSymbolInGlobalScope(dir1, scopeActual);
+                if (amb != null) 
+                   dir1 = "stack_global[" + findPosInGlobalStackById(dir1) +"]";
+                else
+                    dir1 = "stack["+findPosInStackById(dir1)+"]";
+                } 
+
+            } try {
+                int test = Integer.parseInt(dir2);
+            } catch(Exception e) {
+                //System.out.println("DIR2: " + dir2);
+                int ambito = tablas.findSymbolInAllScopes(dir2, scopeActual).getScope().getName();
+
+                if (ambito == 0)
+                    dir2 =  "stack_global[" + this.findPosInGlobalStackById(dir2) +"]";
+                else
+                    dir2 = "stack["+this.findPosInStackById(dir2)+"]";
+            }
+            String op = ctx.getChild(1).getText();
+            IntermediateCode codigo = new IntermediateCode();
+            //System.out.println("dir1 " + dir1);
+            //System.out.println("dir2 " + dir2);
+            codigo.setFirstDir(dir1);
+            codigo.setSecondDir(dir2);
+            codigo.setOperator(op);
+            codigo.setRes("temp"+this.contadorTemps++);
+
+            return codigo; //To change body of generated methods, choose Tools | Templates.
+        }
+        
+        return super.visitRelationExpr(ctx); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Object visitEqIneqExpr(DECAF2Parser.EqIneqExprContext ctx) {
+        if (ctx.getChildCount() > 1) {
+            T val1 = (T)visit(ctx.getChild(0));
+            //System.out.println(val1);
+            T val2 = (T)visit(ctx.getChild(2));
+            //System.out.println(val2);
+            String dir1;
+            String dir2;
+            if (val1 instanceof IntermediateCode){
+                dir1 = ((IntermediateCode)(val1)).getRes();
+            }else
+                dir1 = (String)val1;
+
+            if (val2 instanceof IntermediateCode){
+                dir2 =  ((IntermediateCode)(val2)).getRes();
+            }else
+                dir2 = (String)val2;
+          
+        try{
+            int test = Integer.parseInt(dir1);
+        }catch(Exception e){
+            if (!dir1.contains("[")){
+                Symbol amb = tablaCodigo.findSymbolInGlobalScope(dir1, scopeActual);
+            if (amb != null)
+                dir1 =  "stack_global[" + this.findPosInGlobalStackById(dir1) +"]";
+            else
+                dir1 = "stack["+this.findPosInStackById(dir1)+"]";
+            }
+            
+        }
+        try{
+            int test = Integer.parseInt(dir2);
+        }catch(Exception e){
+            int ambito = tablas.findSymbolInAllScopes(dir2, scopeActual).getScope().getName();
+            if (ambito ==0)
+               dir2 = "stack_global[" + this.findPosInGlobalStackById(dir2) +"]";
+            else
+                dir2+="_"+"label"+"_"+ambito; //TODO: Agregar etiqueta
+        }
+        String op = ctx.getChild(1).getText();
+        IntermediateCode codigo = new IntermediateCode();
+             //System.out.println("dir1 " + dir1);
+             //System.out.println("dir2 " + dir2);
+        codigo.setFirstDir(dir1);
+        codigo.setSecondDir(dir2);
+        codigo.setOperator(op);
+        codigo.setRes("temp"+this.contadorTemps++);
+            //System.out.println(codigo);
+        return codigo; //To change body of generated methods, choose Tools | Templates.
+        }
+        return super.visitEqIneqExpr(ctx); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Object visitAndConditionExpr(DECAF2Parser.AndConditionExprContext ctx) {
+        //System.out.println("AND");
+        ArrayList returnArray = new ArrayList();
+        for (int i = 0;i<ctx.getChildCount();i++){
+            T val = (T)visit(ctx.getChild(i));
+            //System.out.println(val);
+            if (val instanceof ArrayList){
+                returnArray.addAll((ArrayList)val);
+            }
+            if (val instanceof IntermediateCode){
+                returnArray.add(val);
+            }
+            else
+                returnArray.add(val);
+        }
+        
+        //System.out.println("RET AND: " + returnArray);
+        return returnArray; //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Object visitEq_op(DECAF2Parser.Eq_opContext ctx) {
+        return ctx.getChild(0).getText(); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Object visitRel_op(DECAF2Parser.Rel_opContext ctx) {
+        return ctx.getChild(0).getText(); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Object visitAdd_op(DECAF2Parser.Add_opContext ctx) {
+        return ctx.getChild(0).getText(); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Object visitMult_op(DECAF2Parser.Mult_opContext ctx) {
+        return ctx.getChild(0).getText(); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    
 }
